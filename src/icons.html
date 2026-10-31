@@ -1,0 +1,57 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Hifz Recall icons</title>
+<!-- Draws the app icons with the Hafs font; save_icons.py serves this page and writes the PNGs to docs/. -->
+<style>
+@font-face{font-family:Hafs;src:url(fonts/hafs.woff2) format("woff2")}
+body{margin:0;padding:16px;background:#8a8f8c;display:flex;gap:16px;flex-wrap:wrap;align-items:flex-start;font:14px system-ui}
+figure{margin:0;display:flex;flex-direction:column;gap:6px;align-items:center}
+canvas{width:180px;height:180px;border-radius:40px}
+canvas.mask{border-radius:50%}
+</style>
+<div id="out"></div>
+<script>
+const ICONS = [
+  { name: 'icon-512.png', size: 512, k: 1 },
+  { name: 'icon-192.png', size: 192, k: 1 },
+  { name: 'apple-touch-icon.png', size: 180, k: 1 },
+  { name: 'icon-maskable-512.png', size: 512, k: 0.8, mask: true },  // content inside the maskable safe zone
+];
+function draw(ctx, s, k){
+  const g = ctx.createLinearGradient(0, 0, s, s);
+  g.addColorStop(0, '#2c5ea2'); g.addColorStop(1, '#16335c');
+  ctx.fillStyle = g; ctx.fillRect(0, 0, s, s);
+  ctx.save(); ctx.translate(s / 2, s / 2);
+  // Eight-pointed star of two squares, as in the ۞ sign that marks each quarter-ḥizb in the mushaf.
+  const R = 0.37 * s * k, side = R * Math.SQRT2;
+  ctx.strokeStyle = '#e2c47c'; ctx.fillStyle = 'rgba(255,255,255,0.06)';
+  ctx.lineWidth = Math.max(2, 0.02 * s * k); ctx.lineJoin = 'miter';
+  for (const rot of [0, Math.PI / 4]) {
+    ctx.save(); ctx.rotate(rot); ctx.beginPath(); ctx.rect(-side / 2, -side / 2, side, side); ctx.fill(); ctx.stroke(); ctx.restore();
+  }
+  ctx.fillStyle = '#f7e9c3'; ctx.textAlign = 'center'; ctx.direction = 'rtl';
+  ctx.font = `${Math.round(0.24 * s * k)}px Hafs`;
+  const m = ctx.measureText('حفظ');
+  ctx.fillText('حفظ', 0, (m.actualBoundingBoxAscent - m.actualBoundingBoxDescent) / 2);
+  ctx.restore();
+}
+const canvases = {};
+document.fonts.load('40px Hafs', 'حفظ').then(() => {
+  for (const ic of ICONS) {
+    const c = document.createElement('canvas'); c.width = c.height = ic.size; if (ic.mask) c.className = 'mask';
+    draw(c.getContext('2d'), ic.size, ic.k);
+    const f = document.createElement('figure'); f.append(c, Object.assign(document.createElement('figcaption'), { textContent: ic.name }));
+    document.getElementById('out').append(f); canvases[ic.name] = c;
+  }
+  document.title += ' (drawn)';
+});
+async function saveAll(){
+  const done = [];
+  for (const [name, c] of Object.entries(canvases)) {
+    const blob = await new Promise(r => c.toBlob(r, 'image/png'));
+    const res = await fetch('/save/' + name, { method: 'POST', body: blob });
+    done.push(name + ' ' + res.status);
+  }
+  return done;
+}
+</script>

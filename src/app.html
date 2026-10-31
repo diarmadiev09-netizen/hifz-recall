@@ -1,0 +1,890 @@
+<title>Hifz Recall</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+/* Layout: phone-first single column. Sticky sūrah bar on top, practice sheet in the middle, mode bar fixed to the bottom within thumb reach. */
+@font-face{font-family:"KFGQPC Hafs";src:url(data:font/woff2;base64,/*FONT_HAFS*/) format("woff2");font-display:block}
+:root{
+  --paper:#f3f5f1; --sheet:#ffffff; --ink:#17211d; --muted:#5a6962; --line:#dbe1db;
+  --accent:#24508f; --accent-ink:#ffffff; --gold:#94742f; --gold-soft:#f1e7cf;
+  --again:#b2443a; --hard:#a26b17; --good:#2b744e; --easy:#2a68a3;
+  --s0:#e1e7e1; --s1:#e6c97f; --s2:#7db594; --s3:#2b744e;
+  --font-ar:"KFGQPC Hafs","Amiri Quran","Scheherazade New",serif;
+  --font-ui:system-ui,-apple-system,"Segoe UI",Roboto,"Noto Sans",Arial,sans-serif;
+  --ar-size:32px; --nav-h:64px;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --paper:#0f1518; --sheet:#162025; --ink:#e6ece8; --muted:#95a59e; --line:#27353b;
+  --accent:#8fb2ec; --accent-ink:#0f1518; --gold:#d6b36c; --gold-soft:#3a3222;
+  --again:#e3786d; --hard:#dba24e; --good:#6cc296; --easy:#79aee6;
+  --s0:#24313a; --s1:#7d6630; --s2:#3f7a5a; --s3:#6cc296; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --paper:#0f1518; --sheet:#162025; --ink:#e6ece8; --muted:#95a59e; --line:#27353b;
+  --accent:#8fb2ec; --accent-ink:#0f1518; --gold:#d6b36c; --gold-soft:#3a3222;
+  --again:#e3786d; --hard:#dba24e; --good:#6cc296; --easy:#79aee6;
+  --s0:#24313a; --s1:#7d6630; --s2:#3f7a5a; --s3:#6cc296; color-scheme:dark}
+
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--font-ui);font-size:16px;line-height:1.5}
+button,input,select{font:inherit;color:inherit}
+button{touch-action:manipulation}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+a{color:var(--accent)}
+[hidden]{display:none!important}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:30;background:var(--sheet)}
+
+.topbar{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:var(--sheet);border-bottom:1px solid var(--line)}
+.topbar .in{max-width:720px;margin:0 auto;display:flex;align-items:center;gap:8px;padding-block:8px;padding-left:max(12px,env(safe-area-inset-left,0px));padding-right:max(12px,env(safe-area-inset-right,0px))}
+.surahbtn{flex:1;min-width:0;display:flex;align-items:center;gap:10px;border:0;background:transparent;padding:6px 4px;cursor:pointer;text-align:start}
+.surahbtn .num{flex:none;width:34px;height:34px;border-radius:50%;display:grid;place-items:center;background:var(--gold-soft);color:var(--gold);font-weight:700;font-size:14px;font-variant-numeric:tabular-nums}
+.surahbtn .txt{min-width:0;display:flex;flex-direction:column;line-height:1.25}
+.surahbtn .nm{font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.surahbtn .sub{font-size:13px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-variant-numeric:tabular-nums}
+.surahbtn .arn{flex:none;margin-inline-start:auto;font-family:var(--font-ar);font-size:24px;color:var(--gold);line-height:1}
+.iconbtn{flex:none;width:44px;height:44px;border-radius:12px;border:1px solid var(--line);background:var(--paper);display:grid;place-items:center;cursor:pointer}
+.iconbtn svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+
+main{max-width:720px;margin:0 auto;padding-block:16px calc(var(--nav-h) + env(safe-area-inset-bottom,0px) + 24px);padding-left:max(12px,env(safe-area-inset-left,0px));padding-right:max(12px,env(safe-area-inset-right,0px));display:flex;flex-direction:column;gap:14px}
+.card{background:var(--sheet);border:1px solid var(--line);border-radius:16px;padding:16px;display:flex;flex-direction:column;gap:14px;min-width:0}
+
+.nav{position:fixed;left:0;right:0;bottom:0;z-index:20;background:var(--sheet);border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom,0px);padding-left:env(safe-area-inset-left,0px);padding-right:env(safe-area-inset-right,0px)}
+.nav .in{max-width:720px;margin:0 auto;display:grid;grid-template-columns:repeat(4,1fr);height:var(--nav-h)}
+.nav button{border:0;background:transparent;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;font-size:12px;font-weight:600;color:var(--muted);cursor:pointer;padding:4px 2px;min-width:0}
+.nav button span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+.nav svg{width:24px;height:24px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.nav button[aria-current="page"]{color:var(--accent)}
+.nav button[aria-current="page"] svg{stroke-width:2.3}
+
+.label{font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.meta{font-size:14px;color:var(--muted)}
+.row{display:flex;flex-wrap:wrap;gap:8px 12px;align-items:center}
+.spread{display:flex;flex-wrap:wrap;gap:8px 12px;align-items:center;justify-content:space-between}
+.btn{min-height:44px;border:1px solid var(--line);background:var(--sheet);padding:8px 16px;border-radius:12px;cursor:pointer;font-weight:600;display:inline-flex;align-items:center;justify-content:center;gap:8px}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.btn.block{width:100%}
+.pair{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.pair .btn{padding-inline:8px;font-size:14px;line-height:1.25}
+.card.warn{border-color:var(--hard);flex-direction:row;align-items:center;font-size:14px}
+.btn.danger{color:var(--again)}
+.btn:disabled{opacity:.45;cursor:default}
+.pill{font-size:11px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;padding:3px 9px;border-radius:99px;background:var(--s0);color:var(--ink)}
+.pill[data-s="1"]{background:var(--gold-soft);color:var(--gold)}
+.pill[data-s="2"],.pill[data-s="3"]{background:var(--good);color:var(--sheet)}
+.toggle{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:44px;cursor:pointer;font-size:15px}
+.toggle input{width:22px;height:22px;accent-color:var(--accent);flex:none}
+.seg{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;border:1px solid var(--line);border-radius:12px;overflow:hidden;background:var(--paper)}
+.seg button{border:0;border-inline-start:1px solid var(--line);background:transparent;min-height:40px;padding:6px 4px;cursor:pointer;font-variant-numeric:tabular-nums;font-weight:600;color:var(--muted);font-size:14px}
+.seg button:first-child{border-inline-start:0}
+.seg button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink)}
+kbd{font-family:var(--font-ui);font-size:11px;border:1px solid currentColor;border-radius:4px;padding:0 4px;opacity:.6;font-weight:600}
+@media (hover:none){kbd{display:none}}
+
+.ar{font-family:var(--font-ar);direction:rtl;text-align:right;font-size:var(--ar-size);line-height:2;word-spacing:.05em;margin:0;overflow-wrap:break-word}
+.ar.cue{font-size:calc(var(--ar-size) * .74);color:var(--muted)}
+.end{color:var(--gold);white-space:nowrap}
+.hz{color:var(--gold)}
+.tr{font-size:16px;line-height:1.6;color:var(--muted);margin:0}
+.tr.cue{font-style:italic}
+.cuebox{border-inline-start:3px solid var(--gold);padding-inline-start:12px;display:flex;flex-direction:column;gap:2px}
+.cuebox .label{color:var(--gold)}
+.answer{min-height:6em;border:1.5px dashed var(--line);border-radius:14px;padding:8px 14px;display:flex;flex-direction:column;justify-content:center;gap:8px}
+.answer.shown{border:0;background:var(--paper)}
+.more{font-size:14px;color:var(--muted);text-align:center}
+.dock{position:sticky;bottom:calc(var(--nav-h) + env(safe-area-inset-bottom,0px) + 8px);display:flex;flex-direction:column;gap:8px;background:var(--sheet);border:1px solid var(--line);border-radius:16px;padding:10px;box-shadow:0 6px 24px rgba(0,0,0,.08)}
+.dock .two{display:grid;grid-template-columns:1fr 2fr;gap:8px}
+.grades{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}
+.grade{min-height:58px;border:1.5px solid var(--line);border-radius:12px;background:var(--sheet);padding:6px 2px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;font-weight:700;font-size:15px}
+.grade small{font-weight:500;color:var(--muted);font-variant-numeric:tabular-nums;font-size:12px}
+.grade[data-g="0"]{color:var(--again)}.grade[data-g="1"]{color:var(--hard)}.grade[data-g="2"]{color:var(--good)}.grade[data-g="3"]{color:var(--easy)}
+.grade:active{border-color:currentColor}
+
+.ayah{display:flex;flex-direction:column;gap:6px;padding-block:10px;border-bottom:1px solid var(--line)}
+.ayah:last-child{border-bottom:0}
+.w{border-radius:6px;cursor:pointer}
+.w.gap{display:inline-block;min-width:var(--wl,2em);border-bottom:2px dotted var(--gold);color:transparent;line-height:1.3;user-select:none;-webkit-user-select:none;text-align:center}
+.w.gap.fl{color:var(--gold)}
+.w.peek{background:var(--gold-soft)}
+.w.sel{outline:2px solid var(--accent);outline-offset:1px}
+.foot{display:flex;flex-wrap:wrap;gap:4px 14px;align-items:center;justify-content:space-between}
+.listen{display:inline-flex;gap:14px;align-items:center;font-size:14px}
+.linkbtn{border:0;background:none;color:var(--accent);cursor:pointer;padding:6px 0;font-weight:600;font-size:14px}
+
+.slot{font-family:var(--font-ui);font-size:.7em;display:inline-block;min-width:1.6em;border-bottom:2px solid var(--accent);color:var(--accent);text-align:center;animation:blink 1.2s ease-in-out infinite}
+@keyframes blink{50%{opacity:.35}}
+@media (prefers-reduced-motion: reduce){.slot{animation:none}}
+.opts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.opt{min-height:64px;border:1.5px solid var(--line);background:var(--sheet);border-radius:14px;cursor:pointer;padding:4px 10px;display:flex;align-items:center;justify-content:center;position:relative;min-width:0}
+.opt .ar{font-size:calc(var(--ar-size) * .82);line-height:1.8;text-align:center}
+.opt kbd{position:absolute;top:6px;left:8px}
+.opt.bad{border-color:var(--again);opacity:.55;cursor:default}
+.opt.bad .ar{text-decoration:line-through;text-decoration-color:var(--again)}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(90px,1fr));gap:12px}
+.stat b{display:block;font-size:26px;font-variant-numeric:tabular-nums;line-height:1.1}
+.stat span{font-size:13px;color:var(--muted)}
+.empty{display:flex;flex-direction:column;gap:12px}
+.empty h2{margin:0;font-size:20px;text-wrap:balance}
+.empty p{margin:0;color:var(--muted)}
+
+.map{display:grid;grid-template-columns:repeat(auto-fill,minmax(22px,1fr));gap:4px}
+.map button{aspect-ratio:1;border:0;border-radius:5px;background:var(--s0);cursor:pointer;padding:0;font-size:9px;color:transparent;max-width:100%}
+.map button[data-s="1"]{background:var(--s1)}.map button[data-s="2"]{background:var(--s2)}.map button[data-s="3"]{background:var(--s3)}
+.map button.in{box-shadow:inset 0 0 0 2px var(--accent)}
+.legend{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.legend b{width:12px;height:12px;border-radius:3px;display:inline-block}
+.list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column}
+.list button{width:100%;min-height:48px;display:flex;align-items:center;gap:12px;border:0;border-bottom:1px solid var(--line);background:transparent;padding:8px 4px;cursor:pointer;text-align:start}
+.list li:last-child button{border-bottom:0}
+.list .n{flex:none;width:32px;font-variant-numeric:tabular-nums;color:var(--muted);font-size:14px;text-align:center}
+.list .t{flex:1;min-width:0;display:flex;flex-direction:column;line-height:1.3}
+.list .t small{color:var(--muted);font-size:13px}
+.list .a{flex:none;font-family:var(--font-ar);font-size:22px;color:var(--gold)}
+.list .due{flex:none;font-weight:700;color:var(--again);font-variant-numeric:tabular-nums}
+.list button[aria-current="true"]{background:var(--gold-soft);border-radius:10px}
+
+.sheetwrap{position:fixed;inset:0;z-index:40;background:rgba(10,15,14,.45);display:flex;align-items:flex-end;justify-content:center}
+.sheet{background:var(--sheet);width:100%;max-width:720px;max-height:92%;border-radius:20px 20px 0 0;display:flex;flex-direction:column;padding-bottom:env(safe-area-inset-bottom,0px)}
+.sheet header{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px max(16px,env(safe-area-inset-left,0px)) 10px max(16px,env(safe-area-inset-right,0px));border-bottom:1px solid var(--line)}
+.sheet header h2{margin:0;font-size:18px}
+.sheet .body{overflow:auto;padding:12px max(16px,env(safe-area-inset-right,0px)) 16px max(16px,env(safe-area-inset-left,0px));display:flex;flex-direction:column;gap:14px;-webkit-overflow-scrolling:touch}
+.search{width:100%;min-height:44px;padding:8px 12px;border:1px solid var(--line);border-radius:12px;background:var(--paper)}
+.range{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.stepper{display:flex;flex-direction:column;gap:4px}
+.stepper > div{display:grid;grid-template-columns:44px 1fr 44px;border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.stepper button{border:0;background:var(--paper);font-size:20px;cursor:pointer}
+.stepper input{border:0;text-align:center;min-width:0;background:var(--sheet);font-variant-numeric:tabular-nums;font-weight:700;-moz-appearance:textfield}
+.stepper input::-webkit-inner-spin-button{-webkit-appearance:none}
+.group{display:flex;flex-direction:column;gap:8px}
+
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(var(--nav-h) + env(safe-area-inset-bottom,0px) + 12px);z-index:50;background:var(--ink);color:var(--paper);padding:10px 16px;border-radius:12px;font-size:15px;width:max-content;max-width:calc(100% - 32px);box-shadow:0 6px 20px rgba(0,0,0,.25);display:flex;gap:12px;align-items:center}
+.toast .ar{font-size:26px;line-height:1.6;color:var(--paper)}
+footer{font-size:13px;color:var(--muted)}
+footer p{margin:0 0 6px}
+</style>
+
+<header class="topbar">
+  <div class="in">
+    <button class="surahbtn" id="openPicker" type="button" aria-haspopup="dialog">
+      <span class="num" id="tbNum">1</span>
+      <span class="txt"><span class="nm" id="tbName">…</span><span class="sub" id="tbSub"></span></span>
+      <span class="arn" id="tbAr" lang="ar"></span>
+    </button>
+    <button class="iconbtn" id="openSettings" type="button" aria-haspopup="dialog" aria-label="Settings">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>
+    </button>
+  </div>
+</header>
+
+<main id="main" aria-live="polite"><p class="meta">…</p></main>
+
+<nav class="nav" aria-label="Mode">
+  <div class="in">
+    <button type="button" data-mode="recall"><svg viewBox="0 0 24 24"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg><span data-i="tabRecall"></span></button>
+    <button type="button" data-mode="fade"><svg viewBox="0 0 24 24"><path d="M4 7h4M11 7h9M4 12h9M16 12h4M4 17h2M9 17h11" stroke-dasharray="0"/></svg><span data-i="tabFade"></span></button>
+    <button type="button" data-mode="next"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="8" height="7" rx="2"/><rect x="13" y="4" width="8" height="7" rx="2"/><rect x="3" y="13" width="8" height="7" rx="2"/><rect x="13" y="13" width="8" height="7" rx="2"/></svg><span data-i="tabNext"></span></button>
+    <button type="button" data-mode="progress"><svg viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg><span data-i="tabProgress"></span></button>
+  </div>
+</nav>
+
+<div class="sheetwrap" id="picker" hidden role="dialog" aria-modal="true" aria-labelledby="pickerTitle">
+  <div class="sheet">
+    <header><h2 id="pickerTitle" data-i="chooseSurah"></h2><button class="btn primary" type="button" data-close data-i="done"></button></header>
+    <div class="body">
+      <div class="range">
+        <div class="stepper"><label class="label" for="from" data-i="fromAyah"></label><div><button type="button" data-step="from:-1" aria-label="−">−</button><input id="from" type="number" inputmode="numeric" min="1"><button type="button" data-step="from:1" aria-label="+">+</button></div></div>
+        <div class="stepper"><label class="label" for="to" data-i="toAyah"></label><div><button type="button" data-step="to:-1" aria-label="−">−</button><input id="to" type="number" inputmode="numeric" min="1"><button type="button" data-step="to:1" aria-label="+">+</button></div></div>
+      </div>
+      <button class="btn block" id="whole" type="button" data-i="wholeSurah"></button>
+      <input class="search" id="search" type="search" autocomplete="off">
+      <ul class="list" id="surahList"></ul>
+    </div>
+  </div>
+</div>
+
+<div class="sheetwrap" id="settings" hidden role="dialog" aria-modal="true" aria-labelledby="settingsTitle">
+  <div class="sheet">
+    <header><h2 id="settingsTitle" data-i="settings"></h2><button class="btn primary" type="button" data-close data-i="done"></button></header>
+    <div class="body" id="settingsBody"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast" role="status" hidden></div>
+<input type="file" id="importFile" accept=".json,application/json" hidden>
+
+/*DATA*/
+
+<script>
+(() => {
+const $ = s => document.querySelector(s);
+const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const AR_DIGITS = '٠١٢٣٤٥٦٧٨٩';
+const arNum = n => String(n).replace(/\d/g, d => AR_DIGITS[d]);
+const qlink = (s, a) => `https://quran.com/${s}/${a}`;
+const BASMALA = 'بِسۡمِ ٱللَّهِ ٱلرَّحۡمَٰنِ ٱلرَّحِيمِ';
+let IN_CLAUDE = !!(window.claude && window.claude.use);
+const PWA = false;  // build.py switches this on for the installable web app in docs/
+// Some phone browsers give a file opened from a messenger or file manager no storage; test once and warn.
+const CAN_STORE = (() => { try { localStorage.setItem('hifz.t', '1'); const ok = localStorage.getItem('hifz.t') === '1'; localStorage.removeItem('hifz.t'); return ok; } catch(e){ return false; } })();
+let storeWarnClosed = false;
+
+function lsGet(k, d){ try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch(e){ return d; } }
+function lsSet(k, v){ try { localStorage.setItem(k, JSON.stringify(v)); } catch(e){} }
+
+/* ---------- interface text ---------- */
+const plRu = (n, one, few, many) => { const a = n % 10, b = n % 100; return a === 1 && b !== 11 ? one : a >= 2 && a <= 4 && (b < 12 || b > 14) ? few : many; };
+const L = {
+  en: {
+    tabRecall:'Recall', tabFade:'Fade', tabNext:'Next word', tabProgress:'Progress',
+    chooseSurah:'Sūrah and āyāt', done:'Done', fromAyah:'From āyah', toAyah:'To āyah', wholeSurah:'Whole sūrah', search:'Search by name or number',
+    settings:'Settings', language:'Interface language', translation:'Translation', off:'Off', textSize:'Arabic text size', theme:'Appearance', auto:'Auto', light:'Light', dark:'Dark',
+    ayahs: n => `${n} āyāt`, meccan:'Meccan', medinan:'Medinan', range:(a,b) => a === b ? `Āyah ${a}` : `Āyāt ${a}–${b}`,
+    prevAyah:'Previous āyah', opening:'Start of the sūrah', reciteFirst:'Recite the first āyah of the sūrah.',
+    meaningCue:'Show meaning as a cue', meaning:'Meaning', recite:'Recite this āyah from memory, then check yourself.',
+    show:'Show āyah', hint:'Hint', moreWords: n => `${n} more word${n === 1 ? '' : 's'}`, words: n => `${n} words`, page:'page', juz:'juz', left: n => `${n} left`,
+    howWell:'How well did you recall it?', usedHints: n => `You used ${n} hint${n > 1 ? 's' : ''}.`,
+    grades:['Again','Hard','Good','Easy'], today:'today', days: n => `${n} d`, months: n => `${n} mo`, years: n => `${n} yr`,
+    stages:['New','Learning','Familiar','Strong'],
+    sessionDone:'Session complete', nothingDue:(a,b) => `Nothing due in āyāt ${a}–${b}`, nextReview: d => `Next review in this range: ${d}.`,
+    anyway:'You can still recite the whole range now. It will be rescheduled by how well you do.', practise:(a,b) => `Practise āyāt ${a}–${b}`, reviewed: n => `${n} reviewed`,
+    hide:'Hide words', firstLetters:'Show first letters', reshuffle:'Hide other words', hideAgain:'Hide again',
+    fadeHelp:'Recite each āyah aloud and fill the gaps from memory. Tap a gap to check it. Tap a word to see its meaning. Raise the level as it gets easier.',
+    whichNext:(i,n) => `Which word comes next? Word ${i} of ${n}.`, ayahOf:(i,n) => `Āyah ${i} of ${n}`, firstTry:(a,b,p) => `${a}/${b} first try · ${p}%`,
+    startOver:'Start over', nextAyah:'Next āyah', results:'See results', slips: n => n ? `${n} slip${n > 1 ? 's' : ''} in this āyah` : 'No slips',
+    rangeDone:'Range complete', accuracy:'first-try accuracy', wordsLbl:'words', withSlips:'āyāt with slips',
+    weakMsg: l => `Slips in āyāt ${l}. Review them in Recall so they come back on schedule.`, noSlips:'No slips. Try a longer range or hide more words in Fade.',
+    reviewWeak:'Review weak āyāt', goAgain:'Go again',
+    memoryMap:'Memory map', mapHelp:'Tap an āyah to start practising from it.', dueToday:'Due for review today',
+    nothingDueAll:'Nothing due. Āyāt you grade in Recall come back here when it is time to review them.',
+    practised:'āyāt practised', strong:'strong', dueLbl:'due today',
+    backup:'Backup', backupHelp:'Progress is kept on this phone only. Save a backup file from time to time, and load it on a new phone.',
+    saveBackup:'Save backup', loadBackup:'Load backup', backupSaved:'Backup file saved.', backupLoaded: n => `Backup loaded: ${n} āyāt.`, backupBad:'That file is not a Hifz Recall backup.',
+    reset:'Delete all progress', resetAsk:'Delete all progress on this device? This cannot be undone.', yesDelete:'Delete', cancel:'Cancel', resetDone:'Progress deleted.',
+    play:'▶ Listen', needNet:'Listening needs internet', audioBlocked:'Audio cannot play here. Open the āyah on Quran.com to listen.',
+    storeLocal:'Progress is saved on this device.', storeCloud:'Progress is saved to your Claude account.', storeFail:'Your account could not save progress, so it is kept on this device.',
+    sources:'Sources', srcText:'Arabic text: Madinah Mushaf (Hafs ʿan ʿĀṣim) and font by the King Fahd Complex, via Quran.com.',
+    srcTr:'Translations: Saheeh International (English), Elmir Kuliev (Russian), Khalifa Altay (Kazakh). Word-by-word meanings: Quran.com (English).',
+    wbwNote:'', loading:'Loading…', install:'Works offline. Keep this file on your phone and open it in your browser.',
+    noStore:'This browser cannot save progress for a file opened this way. Open the file in Chrome or Firefox, or save a backup in Settings before closing.',
+    installTitle:'Install on your phone', installWhy:'Once installed, the app opens from your home screen and works without internet.', installBtn:'Install app',
+    iosHint:'In Safari, tap the Share button, then “Add to Home Screen”.', androidHint:'Open the browser menu (⋮) and choose “Install app” or “Add to Home screen”.',
+    installedNote:'Installed. Open it from your home screen, even without internet.', offlineReady:'Saved on this device. Works without internet.', offlinePreparing:'Saving for offline use…'
+  },
+  ru: {
+    tabRecall:'Вспомнить', tabFade:'Пропуски', tabNext:'Слово', tabProgress:'Прогресс',
+    chooseSurah:'Сура и аяты', done:'Готово', fromAyah:'С аята', toAyah:'По аят', wholeSurah:'Вся сура', search:'Поиск по названию или номеру',
+    settings:'Настройки', language:'Язык интерфейса', translation:'Перевод', off:'Выкл.', textSize:'Размер арабского текста', theme:'Оформление', auto:'Авто', light:'Светлое', dark:'Тёмное',
+    ayahs: n => `${n} ${plRu(n,'аят','аята','аятов')}`, meccan:'мекканская', medinan:'мединская', range:(a,b) => a === b ? `Аят ${a}` : `Аяты ${a}–${b}`,
+    prevAyah:'Предыдущий аят', opening:'Начало суры', reciteFirst:'Прочитайте первый аят суры.',
+    meaningCue:'Подсказка: смысл аята', meaning:'Смысл', recite:'Прочитайте этот аят наизусть, затем проверьте себя.',
+    show:'Показать аят', hint:'Подсказка', moreWords: n => `ещё ${n} ${plRu(n,'слово','слова','слов')}`, words: n => `${n} ${plRu(n,'слово','слова','слов')}`, page:'стр.', juz:'джуз', left: n => `осталось ${n}`,
+    howWell:'Насколько хорошо вы вспомнили?', usedHints: n => `Подсказок: ${n}.`,
+    grades:['Снова','Трудно','Хорошо','Легко'], today:'сегодня', days: n => `${n} дн.`, months: n => `${n} мес.`, years: n => `${n} г.`,
+    stages:['Новый','Изучается','Знакомый','Прочный'],
+    sessionDone:'Занятие завершено', nothingDue:(a,b) => `В аятах ${a}–${b} нечего повторять`, nextReview: d => `Следующее повторение здесь: ${d}.`,
+    anyway:'Можно прочитать весь отрезок сейчас. Расписание обновится по результату.', practise:(a,b) => `Повторить аяты ${a}–${b}`, reviewed: n => `повторено: ${n}`,
+    hide:'Скрыть слова', firstLetters:'Показывать первые буквы', reshuffle:'Скрыть другие слова', hideAgain:'Скрыть снова',
+    fadeHelp:'Читайте каждый аят вслух, заполняя пропуски по памяти. Нажмите на пропуск, чтобы проверить. Нажмите на слово, чтобы увидеть значение. Повышайте уровень, когда станет легче.',
+    whichNext:(i,n) => `Какое слово дальше? Слово ${i} из ${n}.`, ayahOf:(i,n) => `Аят ${i} из ${n}`, firstTry:(a,b,p) => `${a}/${b} с первой попытки · ${p}%`,
+    startOver:'Заново', nextAyah:'Следующий аят', results:'Результаты', slips: n => n ? `Ошибок в аяте: ${n}` : 'Без ошибок',
+    rangeDone:'Отрезок пройден', accuracy:'с первой попытки', wordsLbl:'слов', withSlips:'аятов с ошибками',
+    weakMsg: l => `Ошибки в аятах ${l}. Повторите их в режиме «Вспомнить», чтобы они попали в расписание.`, noSlips:'Без ошибок. Возьмите отрезок длиннее или скройте больше слов.',
+    reviewWeak:'Повторить слабые аяты', goAgain:'Ещё раз',
+    memoryMap:'Карта памяти', mapHelp:'Нажмите на аят, чтобы начать с него.', dueToday:'Повторить сегодня',
+    nothingDueAll:'Повторять нечего. Аяты, которые вы оцениваете в режиме «Вспомнить», появятся здесь, когда придёт время.',
+    practised:'аятов в работе', strong:'прочных', dueLbl:'на сегодня',
+    backup:'Резервная копия', backupHelp:'Прогресс хранится только на этом телефоне. Время от времени сохраняйте копию и загрузите её на новом телефоне.',
+    saveBackup:'Сохранить копию', loadBackup:'Загрузить копию', backupSaved:'Файл копии сохранён.', backupLoaded: n => `Копия загружена: ${n} ${plRu(n,'аят','аята','аятов')}.`, backupBad:'Этот файл не является копией Hifz Recall.',
+    reset:'Удалить весь прогресс', resetAsk:'Удалить весь прогресс на этом устройстве? Это нельзя отменить.', yesDelete:'Удалить', cancel:'Отмена', resetDone:'Прогресс удалён.',
+    play:'▶ Слушать', needNet:'Для аудио нужен интернет', audioBlocked:'Аудио здесь не воспроизводится. Откройте аят на Quran.com, чтобы послушать.',
+    storeLocal:'Прогресс сохраняется на этом устройстве.', storeCloud:'Прогресс сохраняется в вашем аккаунте Claude.', storeFail:'Аккаунт не смог сохранить прогресс, поэтому он хранится на этом устройстве.',
+    sources:'Источники', srcText:'Арабский текст: Мединский мусхаф (Хафс от Асыма) и шрифт Комплекса короля Фахда, через Quran.com.',
+    srcTr:'Переводы: Эльмир Кулиев (русский), Saheeh International (английский), Халифа Алтай (казахский). Пословные значения: Quran.com (на английском).',
+    wbwNote:'Значение слова дано на английском.', loading:'Загрузка…', install:'Работает без интернета. Храните этот файл на телефоне и открывайте его в браузере.',
+    noStore:'Этот браузер не может сохранять прогресс для файла, открытого таким способом. Откройте файл в Chrome или Firefox либо сохраните копию в настройках перед закрытием.',
+    installTitle:'Установить на телефон', installWhy:'После установки приложение открывается с главного экрана и работает без интернета.', installBtn:'Установить приложение',
+    iosHint:'В Safari нажмите «Поделиться», затем «На экран „Домой“».', androidHint:'Откройте меню браузера (⋮) и выберите «Установить приложение» или «Добавить на главный экран».',
+    installedNote:'Установлено. Открывайте с главного экрана, даже без интернета.', offlineReady:'Сохранено на устройстве. Работает без интернета.', offlinePreparing:'Сохранение для работы без интернета…'
+  },
+  kk: {
+    tabRecall:'Еске түсіру', tabFade:'Бос орын', tabNext:'Сөз', tabProgress:'Үлгерім',
+    chooseSurah:'Сүре және аяттар', done:'Дайын', fromAyah:'Аяттан', toAyah:'Аятқа дейін', wholeSurah:'Бүкіл сүре', search:'Атауы не нөмірі бойынша іздеу',
+    settings:'Баптаулар', language:'Интерфейс тілі', translation:'Аударма', off:'Өшірулі', textSize:'Араб мәтінінің өлшемі', theme:'Түс режимі', auto:'Авто', light:'Ашық', dark:'Қараңғы',
+    ayahs: n => `${n} аят`, meccan:'Меккелік', medinan:'Мәдинелік', range:(a,b) => a === b ? `${a}-аят` : `${a}–${b} аяттар`,
+    prevAyah:'Алдыңғы аят', opening:'Сүренің басы', reciteFirst:'Сүренің бірінші аятын оқыңыз.',
+    meaningCue:'Мағынасын кеңес ретінде көрсету', meaning:'Мағынасы', recite:'Осы аятты жатқа оқып, содан кейін өзіңізді тексеріңіз.',
+    show:'Аятты көрсету', hint:'Кеңес', moreWords: n => `тағы ${n} сөз`, words: n => `${n} сөз`, page:'бет', juz:'пара', left: n => `${n} қалды`,
+    howWell:'Қаншалықты жақсы есіңізге түсірдіңіз?', usedHints: n => `${n} кеңес қолдандыңыз.`,
+    grades:['Қайта','Қиын','Жақсы','Оңай'], today:'бүгін', days: n => `${n} күн`, months: n => `${n} ай`, years: n => `${n} жыл`,
+    stages:['Жаңа','Үйренілуде','Таныс','Берік'],
+    sessionDone:'Сабақ аяқталды', nothingDue:(a,b) => `${a}–${b} аяттарда қайталайтын ештеңе жоқ`, nextReview: d => `Мұндағы келесі қайталау: ${d}.`,
+    anyway:'Бүкіл аралықты қазір де оқи аласыз. Кесте нәтижеңізге қарай жаңарады.', practise:(a,b) => `${a}–${b} аяттарды қайталау`, reviewed: n => `${n} қайталанды`,
+    hide:'Сөздерді жасыру', firstLetters:'Бірінші әріптерді көрсету', reshuffle:'Басқа сөздерді жасыру', hideAgain:'Қайта жасыру',
+    fadeHelp:'Әр аятты дауыстап оқып, бос орындарды жатқа толтырыңыз. Тексеру үшін бос орынды басыңыз. Сөздің мағынасын көру үшін оны басыңыз. Жеңілдеген сайын деңгейді көтеріңіз.',
+    whichNext:(i,n) => `Келесі сөз қайсы? Сөз: ${i}/${n}.`, ayahOf:(i,n) => `Аят: ${i}/${n}`, firstTry:(a,b,p) => `${a}/${b} бірінші реттен · ${p}%`,
+    startOver:'Қайта бастау', nextAyah:'Келесі аят', results:'Нәтижелер', slips: n => n ? `Бұл аятта ${n} қате` : 'Қатесіз',
+    rangeDone:'Аралық аяқталды', accuracy:'бірінші реттен', wordsLbl:'сөз', withSlips:'қатесі бар аят',
+    weakMsg: l => `${l} аяттарында қате бар. Кестеге түсуі үшін оларды «Еске түсіру» режимінде қайталаңыз.`, noSlips:'Қатесіз. Ұзынырақ аралық алыңыз немесе көбірек сөз жасырыңыз.',
+    reviewWeak:'Әлсіз аяттарды қайталау', goAgain:'Тағы бір рет',
+    memoryMap:'Есте сақтау картасы', mapHelp:'Сол аяттан бастау үшін оны басыңыз.', dueToday:'Бүгін қайталау керек',
+    nothingDueAll:'Қайталайтын ештеңе жоқ. «Еске түсіру» режимінде бағалаған аяттар уақыты келгенде осында шығады.',
+    practised:'жатталып жүрген аят', strong:'берік', dueLbl:'бүгінге',
+    backup:'Сақтық көшірме', backupHelp:'Үлгерім тек осы телефонда сақталады. Анда-санда көшірме файлын сақтап, жаңа телефонда оны жүктеңіз.',
+    saveBackup:'Көшірмені сақтау', loadBackup:'Көшірмені жүктеу', backupSaved:'Көшірме файлы сақталды.', backupLoaded: n => `Көшірме жүктелді: ${n} аят.`, backupBad:'Бұл файл Hifz Recall көшірмесі емес.',
+    reset:'Бүкіл үлгерімді жою', resetAsk:'Осы құрылғыдағы бүкіл үлгерімді жою керек пе? Мұны қайтару мүмкін емес.', yesDelete:'Жою', cancel:'Болдырмау', resetDone:'Үлгерім жойылды.',
+    play:'▶ Тыңдау', needNet:'Тыңдау үшін интернет керек', audioBlocked:'Аудио мұнда ойнатылмайды. Тыңдау үшін аятты Quran.com сайтында ашыңыз.',
+    storeLocal:'Үлгерім осы құрылғыда сақталады.', storeCloud:'Үлгерім Claude аккаунтыңызда сақталады.', storeFail:'Аккаунт үлгерімді сақтай алмады, сондықтан ол осы құрылғыда сақталады.',
+    sources:'Дереккөздер', srcText:'Араб мәтіні: Мәдина мұсхафы (Хафс Асымнан) және Король Фаһд кешенінің қарпі, Quran.com арқылы.',
+    srcTr:'Аудармалар: Халифа Алтай (қазақша), Эльмир Кулиев (орысша), Saheeh International (ағылшынша). Сөзбе-сөз мағыналар: Quran.com (ағылшынша).',
+    wbwNote:'Сөздің мағынасы ағылшынша берілген.', loading:'Жүктелуде…', install:'Интернетсіз жұмыс істейді. Бұл файлды телефонда сақтап, браузерде ашыңыз.',
+    noStore:'Бұл браузер осылай ашылған файлдың үлгерімін сақтай алмайды. Файлды Chrome немесе Firefox браузерінде ашыңыз, не жабар алдында баптаулардан көшірмесін сақтаңыз.',
+    installTitle:'Телефонға орнату', installWhy:'Орнатқаннан кейін қолданба басты экраннан ашылып, интернетсіз жұмыс істейді.', installBtn:'Қолданбаны орнату',
+    iosHint:'Safari-де «Бөлісу» (Share / «Поделиться») түймесін басып, «Add to Home Screen» («На экран „Домой“») тармағын таңдаңыз.', androidHint:'Браузер мәзірін (⋮) ашып, «Қолданбаны орнату» немесе «Негізгі экранға қосу» тармағын таңдаңыз.',
+    installedNote:'Орнатылды. Интернет болмаса да, басты экраннан ашыңыз.', offlineReady:'Құрылғыда сақталды. Интернетсіз жұмыс істейді.', offlinePreparing:'Интернетсіз жұмыс үшін сақталуда…'
+  }
+};
+const LANGS = [['kk','Қазақша'],['ru','Русский'],['en','English']];
+const T = (k, ...a) => { const v = (L[S.lang] || L.en)[k]; return typeof v === 'function' ? v(...a) : v; };
+
+/* ---------- dates & spaced repetition ---------- */
+const pad = n => String(n).padStart(2, '0');
+const dstr = d => `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+const today = () => dstr(new Date());
+const addDays = n => { const d = new Date(); d.setDate(d.getDate() + n); return dstr(d); };
+// Month names are built in: many phone browsers ship without Kazakh date formats.
+const MONTHS = {
+  en: ['January','February','March','April','May','June','July','August','September','October','November','December'],
+  ru: ['января','февраля','марта','апреля','мая','июня','июля','августа','сентября','октября','ноября','декабря'],
+  kk: ['қаңтар','ақпан','наурыз','сәуір','мамыр','маусым','шілде','тамыз','қыркүйек','қазан','қараша','желтоқсан']
+};
+const fmtDate = s => { const [, m, d] = s.split('-').map(Number); return `${d} ${(MONTHS[S.lang] || MONTHS.en)[m - 1]}`; };
+
+function schedule(card, g){
+  const c = card ? { ...card } : { e: 2.5, i: 0, r: 0, l: 0 };
+  if (g === 0) { c.r = 0; c.i = 0; c.l = (c.l || 0) + 1; c.e = Math.max(1.3, c.e - 0.2); }
+  else {
+    if (g === 1) { c.i = c.r === 0 ? 1 : Math.max(c.i + 1, Math.round(c.i * 1.2)); c.e = Math.max(1.3, c.e - 0.15); }
+    else if (g === 2) { c.i = c.r === 0 ? 1 : c.r === 1 ? 3 : Math.max(c.i + 1, Math.round(c.i * c.e)); }
+    else { c.i = c.r === 0 ? 4 : Math.max(c.i + 2, Math.round(Math.max(c.i, 1) * c.e * 1.3)); c.e += 0.15; }
+    c.r++;
+  }
+  c.d = addDays(c.i); c.t = Date.now();
+  return c;
+}
+const ivl = i => i === 0 ? T('today') : i < 30 ? T('days', i) : i < 365 ? T('months', Math.round(i / 30)) : T('years', +(i / 365).toFixed(1));
+const stage = c => !c ? 0 : c.i < 3 ? 1 : c.i < 21 ? 2 : 3;
+
+/* ---------- progress store: this device always; Claude account too when the page runs on claude.ai ---------- */
+const LS_PROG = 'hifz.progress.v1';
+let progress = lsGet(LS_PROG, {});
+let db = null, uid = null, writing = false, storeMsg = 'storeLocal';
+const pending = new Set();
+const cardsFor = sid => (progress[sid] ||= {});
+try { navigator.storage && navigator.storage.persist && navigator.storage.persist(); } catch(e){}
+
+function save(sid){
+  lsSet(LS_PROG, progress);
+  if (db) { pending.add(String(sid)); flush(); }
+}
+async function flush(){
+  if (writing) return;
+  writing = true;
+  while (pending.size && db) {
+    const sid = pending.values().next().value; pending.delete(sid);
+    const ref = db.collection('data/users/' + uid).doc('s' + sid);
+    try { await ref.set({ cards: progress[sid] || {} }); }
+    catch (e) {
+      if (e && e.code === 'unavailable') {
+        await new Promise(r => setTimeout(r, 600 + Math.random() * 900));
+        try { await ref.set({ cards: progress[sid] || {} }); continue; } catch(e2) {}
+      }
+      db = null; storeMsg = 'storeFail';
+    }
+  }
+  writing = false;
+}
+async function initCloud(){
+  if (!IN_CLAUDE) return;
+  try {
+    const [d, u] = await Promise.all([claude.use('db'), claude.use('user')]);
+    if (!d || !u) return;
+    const id = await u.id();
+    if (!id) return;
+    const snap = await d.collection('data/users/' + id).get();
+    const dirty = new Set(Object.keys(progress));
+    for (const doc of snap.docs) {
+      const m = /^s(\d+)$/.exec(doc.id); if (!m) continue;
+      const remote = (doc.data() || {}).cards || {};
+      const local = cardsFor(m[1]);
+      let localNewer = false;
+      for (const [a, rc] of Object.entries(remote)) if (!local[a] || (rc.t || 0) >= (local[a].t || 0)) local[a] = rc;
+      for (const [a, lc] of Object.entries(local)) if (!remote[a] || (lc.t || 0) > (remote[a].t || 0)) localNewer = true;
+      if (!localNewer) dirty.delete(m[1]);
+    }
+    db = d; uid = id; storeMsg = 'storeCloud';
+    lsSet(LS_PROG, progress);
+    for (const sid of dirty) if (Object.keys(progress[sid] || {}).length) pending.add(sid);
+    flush();
+    if (S.mode === 'progress' || (S.mode === 'recall' && session && !session.revealed && session.n === 0)) { session = null; render(); }
+  } catch (e) { /* stay on this device */ }
+}
+
+/* ---------- embedded Quran data (parsed one sūrah at a time) ---------- */
+const chapters = JSON.parse(document.getElementById('q-chapters').textContent);
+const surahCache = {};
+function loadSurah(id){
+  if (!surahCache[id]) surahCache[id] = JSON.parse(document.getElementById('q-' + id).textContent);
+  return surahCache[id];
+}
+
+/* ---------- UI state ---------- */
+const navLang = ((navigator.languages && navigator.languages[0]) || navigator.language || 'kk').slice(0, 2);
+const S = Object.assign({ lang: L[navLang] ? navLang : 'kk', tr: 'auto', size: 'M', theme: 'auto', surah: 1, from: 1, to: 7, mode: 'recall', cueTr: false, level: 0.5, firstLetters: false, seed: 1 }, lsGet('hifz.ui', {}));
+const saveUI = () => lsSet('hifz.ui', S);
+const SIZES = { S: 26, M: 32, L: 38, XL: 46 };
+let surah = null, session = null, quiz = null, confirmReset = false;
+const fadeShown = new Set();
+const ch = () => chapters[S.surah - 1];
+const ayah = n => surah[n - 1];
+const trLang = () => S.tr === 'auto' ? S.lang : S.tr;
+const trText = v => trLang() === 'off' ? '' : v[trLang()];
+function rangeList(){ const out = []; for (let a = S.from; a <= S.to; a++) out.push(a); return out; }
+const surahName = c => c.n;
+const surahSub = c => S.lang === 'kk' ? '' : (S.lang === 'ru' ? c.ru : c.en);
+
+/* ---------- Arabic rendering ---------- */
+const endMark = n => `<span class="end">${arNum(n)}</span>`;  // the KFGQPC font draws Arabic-Indic digits as the āyah-end ornament
+const sep = (v, i) => (v.J && v.J[i]) ? '' : ' ';
+function ayahHTML(v, upto){
+  const n = upto == null ? v.w.length : upto;
+  let s = v.h ? '<span class="hz">۞</span> ' : '';
+  for (let i = 0; i < n; i++) s += esc(v.w[i]) + (i < n - 1 ? sep(v, i) : '');
+  return upto == null ? s + ' ' + endMark(v.n) : s;
+}
+// Only the closing words of the previous āyah, so a long cue never pushes the answer off a phone screen.
+function tailHTML(v, k = 8){
+  if (v.w.length <= k + 2) return ayahHTML(v);
+  let s = '… ';
+  for (let i = v.w.length - k; i < v.w.length; i++) s += esc(v.w[i]) + (i < v.w.length - 1 ? sep(v, i) : '');
+  return s + ' ' + endMark(v.n);
+}
+
+let toastTimer;
+function toast(html){ const t = $('#toast'); t.innerHTML = html; t.hidden = false; clearTimeout(toastTimer); toastTimer = setTimeout(() => t.hidden = true, 4500); }
+
+/* ---------- audio: streams from Quran.com when online ---------- */
+let audioBlocked = false;
+const player = new Audio();
+function listen(v){
+  const link = `<a href="${qlink(S.surah, v.n)}" target="_blank" rel="noopener">Quran.com ↗</a>`;
+  if (audioBlocked) return `<span class="listen">${link}</span>`;
+  return `<span class="listen"><button class="linkbtn" data-play="${v.n}" type="button">${T('play')}</button>${link}</span>`;
+}
+function play(n){
+  if (!navigator.onLine) return toast(esc(T('needNet')));
+  player.src = `https://verses.quran.com/Alafasy/mp3/${String(S.surah).padStart(3, '0')}${String(n).padStart(3, '0')}.mp3`;
+  player.play().catch(() => {});
+}
+player.addEventListener('error', () => {
+  if (!navigator.onLine) return toast(esc(T('needNet')));
+  if (!IN_CLAUDE) return toast(esc(T('needNet')));
+  audioBlocked = true; toast(esc(T('audioBlocked'))); render();
+});
+
+/* ---------- install as an app (web build only) ---------- */
+const IS_IOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+const standalone = () => matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
+let installPrompt = null, offline = 'none';
+function refreshInstall(){ if (S.mode === 'progress') render(); if (!$('#settings').hidden) renderSettings(); }
+if (PWA) {
+  addEventListener('beforeinstallprompt', e => { e.preventDefault(); installPrompt = e; refreshInstall(); });
+  addEventListener('appinstalled', () => { installPrompt = null; refreshInstall(); });
+  if ('serviceWorker' in navigator && window.isSecureContext) {
+    offline = 'saving';
+    navigator.serviceWorker.register('sw.js').catch(() => { offline = 'none'; refreshInstall(); });
+    // The worker only activates after every app file is cached, so "ready" means the app now opens offline.
+    navigator.serviceWorker.ready.then(() => { offline = 'ready'; refreshInstall(); });
+  }
+}
+function installHTML(){
+  let h = `<span class="label">${T('installTitle')}</span>`;
+  if (standalone()) h += `<p class="meta" style="margin:0">${T('installedNote')}</p>`;
+  else {
+    h += `<p class="meta" style="margin:0">${T('installWhy')}</p>`;
+    h += installPrompt ? `<button class="btn primary block" id="installBtn" type="button">${T('installBtn')}</button>`
+                       : `<p style="margin:0">${T(IS_IOS ? 'iosHint' : 'androidHint')}</p>`;
+  }
+  if (offline !== 'none') h += `<p class="meta" style="margin:0">${offline === 'ready' ? '✓ ' + T('offlineReady') : T('offlinePreparing')}</p>`;
+  return h;
+}
+async function install(){
+  const p = installPrompt; if (!p) return;
+  installPrompt = null;
+  p.prompt();
+  try { await p.userChoice; } catch(e){}
+  refreshInstall();
+}
+
+/* ---------- Recall ---------- */
+function startRecall(list){
+  const t = today(), cards = cardsFor(S.surah);
+  const q = list || rangeList().filter(a => !cards[a] || cards[a].d <= t);
+  session = { queue: q, idx: 0, revealed: false, hints: 0, n: 0, grades: [0, 0, 0, 0] };
+}
+function cueHTML(a){
+  const prev = a > 1 ? ayah(a - 1) : null;
+  if (prev) return `<div class="cuebox"><span class="label">${T('prevAyah')} · ${a - 1}</span><p class="ar cue" lang="ar">${tailHTML(prev)}</p></div>`;
+  return `<div class="cuebox"><span class="label">${T('opening')}</span>${ch().b ? `<p class="ar cue" lang="ar">${BASMALA}</p>` : `<p class="tr cue">${T('reciteFirst')}</p>`}</div>`;
+}
+function renderRecall(){
+  if (!session) startRecall();
+  const ss = session, cards = cardsFor(S.surah);
+  if (ss.idx >= ss.queue.length) {
+    const next = rangeList().map(a => cards[a] && cards[a].d).filter(Boolean).sort()[0];
+    const done = ss.n > 0;
+    return `<section class="card empty">
+      <h2>${done ? T('sessionDone') : T('nothingDue', S.from, S.to)}</h2>
+      ${done ? `<div class="stats">${T('grades').map((g, i) => `<div class="stat"><b>${ss.grades[i]}</b><span>${g}</span></div>`).join('')}</div>` : ''}
+      <p>${next ? T('nextReview', fmtDate(next)) + ' ' : ''}${T('anyway')}</p>
+      <button class="btn primary block" id="againAll" type="button">${T('practise', S.from, S.to)}</button>
+    </section>`;
+  }
+  const a = ss.queue[ss.idx], v = ayah(a), card = cards[a], s = stage(card), tr = trText(v);
+  let html = `<section class="card">
+    <div class="spread"><div class="row"><strong>${T('range', a, a)}</strong><span class="pill" data-s="${s}">${T('stages')[s]}</span></div><span class="meta">${T('left', ss.queue.length - ss.idx)}</span></div>
+    ${cueHTML(a)}
+    ${S.cueTr && tr ? `<div class="cuebox"><span class="label">${T('meaning')}</span><p class="tr cue">${esc(tr)}</p></div>` : ''}`;
+  if (!ss.revealed) {
+    html += `<div class="answer">${ss.hints ? `<p class="ar" lang="ar">${ayahHTML(v, ss.hints)} …</p>` : ''}
+      <div class="more">${ss.hints ? T('moreWords', v.w.length - ss.hints) : T('recite')}</div></div>
+      <div class="meta">${T('words', v.w.length)} · ${T('page')} ${v.pg} · ${T('juz')} ${v.j}</div></section>
+      <div class="dock"><div class="two"><button class="btn" id="hint" type="button" ${ss.hints >= v.w.length ? 'disabled' : ''}>${T('hint')} <kbd>H</kbd></button>
+      <button class="btn primary" id="reveal" type="button">${T('show')} <kbd>Space</kbd></button></div></div>`;
+  } else {
+    html += `<div class="answer shown"><p class="ar" lang="ar">${ayahHTML(v)}</p>${tr ? `<p class="tr">${esc(tr)}</p>` : ''}<div>${listen(v)}</div></div></section>
+      <div class="dock"><div class="meta">${T('howWell')}${ss.hints ? ' ' + T('usedHints', ss.hints) : ''}</div>
+      <div class="grades">${T('grades').map((l, g) => `<button class="grade" data-g="${g}" type="button">${l}<small>${g === 0 ? T('today') : ivl(schedule(card, g).i)}</small></button>`).join('')}</div></div>`;
+  }
+  return html;
+}
+function grade(g){
+  const ss = session, a = ss.queue[ss.idx];
+  cardsFor(S.surah)[a] = schedule(cardsFor(S.surah)[a], g);
+  save(S.surah);
+  ss.grades[g]++; ss.n++;
+  if (g === 0) ss.queue.splice(Math.min(ss.idx + 4, ss.queue.length), 0, a);
+  ss.idx++; ss.revealed = false; ss.hints = 0;
+  render(true);
+}
+
+/* ---------- Fade ---------- */
+function hash(a, w, seed){
+  let x = (S.surah * 73856093) ^ (a * 19349663) ^ (w * 83492791) ^ Math.imul(seed, 2654435761);
+  x = Math.imul(x ^ (x >>> 16), 0x45d9f3b); x = Math.imul(x ^ (x >>> 16), 0x45d9f3b); x ^= x >>> 16;
+  return (x >>> 0) / 4294967296;
+}
+const MARKS = /[ؐ-ًؚ-ٰٟۖ-ۭ࣓-ࣿ]/;
+const MARKS_G = /[ؐ-ًؚ-ٰٟۖ-ۭ࣓-ࣿـ]/g;
+// Letters that never join the next letter get no connecting stroke (tatweel) after them.
+const NON_JOINING = 'اٱأإآدذرزوؤةء';
+function firstLetter(w){ const c = Array.from(w); let out = c[0] || ''; for (let i = 1; i < c.length && MARKS.test(c[i]); i++) out += c[i]; return out + (NON_JOINING.includes(c[0]) ? '' : 'ـ'); }
+function wordSpan(a, i){
+  const w = ayah(a).w[i], key = a + ':' + i;
+  const hidden = S.level > 0 && hash(a, i, S.seed) < S.level;
+  if (hidden && !fadeShown.has(key)) {
+    const len = Math.max(1.4, w.replace(MARKS_G, '').length * 0.45);
+    return `<span class="w gap${S.firstLetters ? ' fl' : ''}" data-k="${key}" style="--wl:${len}em" role="button" tabindex="0">${S.firstLetters ? esc(firstLetter(w)) : '&nbsp;'}</span>`;
+  }
+  return `<span class="w${hidden ? ' peek' : ''}" data-a="${a}" data-i="${i}">${esc(w)}</span>`;
+}
+// Reveal one gap in place: re-rendering a whole long range on every tap is slow on phones.
+function revealGap(el){
+  fadeShown.add(el.dataset.k);
+  const [a, i] = el.dataset.k.split(':').map(Number);
+  el.outerHTML = wordSpan(a, i);
+}
+function renderFade(){
+  const levels = [0, 0.25, 0.5, 0.75, 1];
+  let html = `<section class="card">
+    <div class="group"><span class="label">${T('hide')}</span>
+      <div class="seg" role="group">${levels.map(l => `<button type="button" data-level="${l}" aria-pressed="${S.level === l}">${l * 100}%</button>`).join('')}</div></div>
+    <label class="toggle">${T('firstLetters')}<input type="checkbox" id="firstLetters" ${S.firstLetters ? 'checked' : ''}></label>
+    <div class="pair"><button class="btn" id="reshuffle" type="button">${T('reshuffle')}</button><button class="btn" id="hideAgain" type="button">${T('hideAgain')}</button></div>
+    <p class="meta" style="margin:0">${T('fadeHelp')}</p></section><section class="card">`;
+  for (const a of rangeList()) {
+    const v = ayah(a), tr = trText(v);
+    let words = v.h ? '<span class="hz">۞</span> ' : '';
+    v.w.forEach((w, i) => { words += wordSpan(a, i) + (i < v.w.length - 1 ? sep(v, i) : ''); });
+    html += `<div class="ayah"><p class="ar" lang="ar">${words} ${endMark(a)}</p>
+      ${tr ? `<p class="tr">${esc(tr)}</p>` : ''}<div class="foot"><span class="meta">${T('range', a, a)}</span>${listen(v)}</div></div>`;
+  }
+  return html + '</section>';
+}
+function wordInfo(a, i){
+  const v = ayah(a);
+  const note = S.lang === 'en' ? '' : ` <small style="opacity:.7">EN</small>`;
+  toast(`<span class="ar" lang="ar">${esc(v.w[i])}</span><span><b>${esc(v.r[i])}</b><br>${esc(v.g[i])}${note}</span>`);
+}
+
+/* ---------- Next word ---------- */
+const norm = w => w.replace(MARKS_G, '').replace(/[ٱأإآ]/g, 'ا').replace(/ى/g, 'ي').replace(/[۩۞]/g, '').trim();
+function shuffle(arr){ for (let i = arr.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [arr[i], arr[j]] = [arr[j], arr[i]]; } return arr; }
+function startQuiz(){ quiz = { list: rangeList(), ai: 0, wi: 0, opts: null, bad: new Set(), first: 0, total: 0, miss: {}, done: false }; makeOpts(); }
+function makeOpts(){
+  const q = quiz, v = ayah(q.list[q.ai]), right = v.w[q.wi], rn = norm(right);
+  const pool = new Map();
+  for (const x of surah) for (const w of x.w) { const n = norm(w); if (n && n !== rn && !pool.has(n)) pool.set(n, w); }
+  if (pool.size < 3) for (const x of loadSurah(1).concat(loadSurah(112))) for (const w of x.w) { const n = norm(w); if (n !== rn && !pool.has(n)) pool.set(n, w); }
+  // Prefer distractors of similar length so the answer does not stand out.
+  const cands = shuffle([...pool.values()]).sort((a, b) => Math.abs(norm(a).length - rn.length) - Math.abs(norm(b).length - rn.length)).slice(0, 12);
+  q.opts = shuffle([right, ...shuffle(cands).slice(0, 3)]);
+  q.bad = new Set();
+}
+function renderNext(){
+  if (!quiz) startQuiz();
+  const q = quiz, pct = q.total ? Math.round(q.first / q.total * 100) : 100;
+  const head = `<div class="spread"><span class="meta">${T('ayahOf', Math.min(q.ai + 1, q.list.length), q.list.length)} · ${T('firstTry', q.first, q.total, pct)}</span>
+    <button class="linkbtn" id="restartQuiz" type="button">${T('startOver')}</button></div>`;
+  if (q.done) {
+    const weak = Object.entries(q.miss).filter(([, n]) => n > 0).map(([a]) => +a);
+    return `<section class="card empty">${head}<h2>${T('rangeDone')}</h2>
+      <div class="stats"><div class="stat"><b>${pct}%</b><span>${T('accuracy')}</span></div><div class="stat"><b>${q.total}</b><span>${T('wordsLbl')}</span></div><div class="stat"><b>${weak.length}</b><span>${T('withSlips')}</span></div></div>
+      <p>${weak.length ? T('weakMsg', weak.join(', ')) : T('noSlips')}</p>
+      ${weak.length ? `<button class="btn primary block" id="weakRecall" type="button" data-weak="${weak.join(',')}">${T('reviewWeak')}</button>` : ''}
+      <button class="btn block" id="restartQuiz2" type="button">${T('goAgain')}</button></section>`;
+  }
+  const a = q.list[q.ai], v = ayah(a), complete = q.wi >= v.w.length, tr = trText(v);
+  let html = `<section class="card">${head}${cueHTML(a)}
+    <div class="answer${complete ? ' shown' : ''}"><p class="ar" lang="ar">${complete ? ayahHTML(v) : ayahHTML(v, q.wi) + (q.wi ? ' ' : '') + '<span class="slot">?</span>'}</p>
+    ${complete && tr ? `<p class="tr">${esc(tr)}</p>` : ''}${complete ? `<div>${listen(v)}</div>` : ''}</div>`;
+  if (complete) html += `</section><div class="dock"><div class="meta">${T('slips', q.miss[a] || 0)}</div><button class="btn primary block" id="nextAyah" type="button">${q.ai + 1 < q.list.length ? T('nextAyah') : T('results')} <kbd>Enter</kbd></button></div>`;
+  else html += `<div class="meta">${T('whichNext', q.wi + 1, v.w.length)}</div></section>
+    <div class="dock"><div class="opts">${q.opts.map((w, i) => `<button class="opt${q.bad.has(i) ? ' bad' : ''}" data-opt="${i}" type="button" ${q.bad.has(i) ? 'disabled' : ''}><kbd>${i + 1}</kbd><span class="ar" lang="ar">${esc(w)}</span></button>`).join('')}</div></div>`;
+  return html;
+}
+function choose(i){
+  const q = quiz, a = q.list[q.ai], v = ayah(a);
+  if (q.done || q.wi >= v.w.length || q.bad.has(i)) return;
+  if (norm(q.opts[i]) === norm(v.w[q.wi])) {
+    if (!q.bad.size) q.first++;
+    q.total++; q.wi++;
+    if (q.wi < v.w.length) makeOpts();
+  } else { q.bad.add(i); q.miss[a] = (q.miss[a] || 0) + 1; if (navigator.vibrate) try { navigator.vibrate(40); } catch(e){} }
+  render();
+}
+function nextAyah(){
+  const q = quiz; q.ai++; q.wi = 0;
+  if (q.ai >= q.list.length) q.done = true; else makeOpts();
+  render(true);
+}
+
+/* ---------- Progress ---------- */
+function renderProgress(){
+  const c = ch(), cards = cardsFor(S.surah), counts = [0, 0, 0, 0], t = today();
+  let map = '';
+  for (let a = 1; a <= c.c; a++) {
+    const s = stage(cards[a]); counts[s]++;
+    map += `<button type="button" data-map="${a}" data-s="${s}" class="${a >= S.from && a <= S.to ? 'in' : ''}" aria-label="${T('range', a, a)}: ${T('stages')[s]}">${a}</button>`;
+  }
+  let total = 0, strong = 0, dueN = 0; const due = [];
+  for (const [sid, cs] of Object.entries(progress)) {
+    const vals = Object.values(cs); total += vals.length; strong += vals.filter(x => stage(x) === 3).length;
+    const n = vals.filter(x => x.d <= t).length; dueN += n;
+    if (n) due.push([+sid, n]);
+  }
+  due.sort((a, b) => a[0] - b[0]);
+  return `${PWA && !standalone() ? `<section class="card">${installHTML()}</section>` : ''}<section class="card"><div class="stats">
+      <div class="stat"><b>${total}</b><span>${T('practised')}</span></div><div class="stat"><b>${strong}</b><span>${T('strong')}</span></div><div class="stat"><b>${dueN}</b><span>${T('dueLbl')}</span></div></div></section>
+    <section class="card"><div class="spread"><span class="label">${T('memoryMap')}</span><span class="meta">${esc(surahName(c))}</span></div>
+      <div class="map">${map}</div>
+      <div class="legend">${T('stages').map((n, i) => `<span><b style="background:var(--s${i})"></b>${n} ${counts[i]}</span>`).join('')}</div>
+      <p class="meta" style="margin:0">${T('mapHelp')}</p></section>
+    <section class="card"><span class="label">${T('dueToday')}</span>
+      ${due.length ? `<ul class="list">${due.map(([sid, n]) => { const x = chapters[sid - 1]; return `<li><button type="button" data-due="${sid}"><span class="n">${sid}</span><span class="t">${esc(x.n)}<small>${esc(surahSub(x))}</small></span><span class="due">${n}</span></button></li>`; }).join('')}</ul>`
+                   : `<p class="meta" style="margin:0">${T('nothingDueAll')}</p>`}
+      <p class="meta" style="margin:0">${T(storeMsg)}</p></section>
+    <footer><p><b>${T('sources')}.</b> ${T('srcText')}</p><p>${T('srcTr')}</p>${IN_CLAUDE || PWA ? '' : `<p>${T('install')}</p>`}</footer>`;
+}
+
+/* ---------- settings sheet ---------- */
+function renderSettings(){
+  const seg = (name, opts, cur) => `<div class="seg" role="group">${opts.map(([v, l]) => `<button type="button" data-set="${name}" data-val="${v}" aria-pressed="${cur === v}">${esc(l)}</button>`).join('')}</div>`;
+  let html = `<div class="group"><span class="label">${T('language')}</span>${seg('lang', LANGS, S.lang)}</div>
+    <div class="group"><span class="label">${T('translation')}</span>${seg('tr', [['auto', T('auto')], ['kk', 'Қаз'], ['ru', 'Рус'], ['en', 'Eng'], ['off', T('off')]], S.tr)}</div>
+    <label class="toggle">${T('meaningCue')}<input type="checkbox" id="cueTr" ${S.cueTr ? 'checked' : ''}></label>
+    <div class="group"><span class="label">${T('textSize')}</span>${seg('size', Object.keys(SIZES).map(k => [k, k]), S.size)}
+      <p class="ar" lang="ar" style="text-align:center">${BASMALA}</p></div>
+    <div class="group"><span class="label">${T('theme')}</span>${seg('theme', [['auto', T('auto')], ['light', T('light')], ['dark', T('dark')]], S.theme)}</div>`;
+  if (PWA) html += `<div class="group">${installHTML()}</div>`;
+  if (!IN_CLAUDE) html += `<div class="group"><span class="label">${T('backup')}</span><p class="meta" style="margin:0">${T('backupHelp')}</p>
+      <div class="row"><button class="btn" id="exportBtn" type="button">${T('saveBackup')}</button><button class="btn" id="importBtn" type="button">${T('loadBackup')}</button></div></div>`;
+  html += confirmReset
+    ? `<div class="group"><p style="margin:0">${T('resetAsk')}</p><div class="row"><button class="btn danger" id="resetYes" type="button">${T('yesDelete')}</button><button class="btn" id="resetNo" type="button">${T('cancel')}</button></div></div>`
+    : `<button class="btn danger block" id="resetBtn" type="button">${T('reset')}</button>`;
+  $('#settingsBody').innerHTML = html;
+}
+
+/* ---------- sūrah picker ---------- */
+function renderPicker(){
+  const q = $('#search').value.trim().toLowerCase();
+  const items = chapters.filter(c => !q || String(c.id) === q || c.n.toLowerCase().includes(q) || c.a.includes(q) || c.en.toLowerCase().includes(q) || c.ru.toLowerCase().includes(q));
+  $('#surahList').innerHTML = items.map(c => `<li><button type="button" data-pick="${c.id}" aria-current="${c.id === S.surah}"><span class="n">${c.id}</span>
+    <span class="t">${esc(c.n)}<small>${esc([surahSub(c), T('ayahs', c.c)].filter(Boolean).join(' · '))}</small></span><span class="a" lang="ar">${esc(c.a)}</span></button></li>`).join('');
+  $('#from').max = $('#to').max = ch().c; $('#from').value = S.from; $('#to').value = S.to;
+}
+function openSheet(id){ $(id).hidden = false; document.body.style.overflow = 'hidden'; }
+function closeSheets(){ $('#picker').hidden = true; $('#settings').hidden = true; document.body.style.overflow = ''; confirmReset = false; }
+
+/* ---------- top-level render ---------- */
+function applyLook(){
+  document.documentElement.lang = S.lang;
+  document.documentElement.style.setProperty('--ar-size', SIZES[S.size] + 'px');
+  if (S.theme === 'auto') { if (!IN_CLAUDE) document.documentElement.removeAttribute('data-theme'); }
+  else document.documentElement.setAttribute('data-theme', S.theme);
+  document.querySelectorAll('[data-i]').forEach(el => el.textContent = T(el.dataset.i));
+  $('#search').placeholder = T('search');
+  $('#openSettings').setAttribute('aria-label', T('settings'));
+}
+function render(scrollTop){
+  const c = ch();
+  $('#tbNum').textContent = c.id; $('#tbName').textContent = surahName(c); $('#tbAr').textContent = c.a;
+  $('#tbSub').textContent = `${T('range', S.from, S.to)} · ${T('ayahs', c.c)}`;
+  document.querySelectorAll('.nav button').forEach(b => { if (b.dataset.mode === S.mode) b.setAttribute('aria-current', 'page'); else b.removeAttribute('aria-current'); });
+  const warn = !CAN_STORE && !IN_CLAUDE && !storeWarnClosed
+    ? `<section class="card warn"><p style="margin:0">${T('noStore')}</p><button class="btn" id="closeWarn" type="button">OK</button></section>` : '';
+  $('#main').innerHTML = warn + (S.mode === 'recall' ? renderRecall() : S.mode === 'fade' ? renderFade() : S.mode === 'next' ? renderNext() : renderProgress());
+  if (scrollTop) window.scrollTo({ top: 0 });
+}
+function selectSurah(id, from, to){
+  S.surah = id;
+  const c = chapters[id - 1];
+  S.from = Math.min(Math.max(1, from || 1), c.c);
+  S.to = Math.min(Math.max(S.from, to || Math.min(c.c, S.from + 6)), c.c);
+  saveUI();
+  surah = loadSurah(id);
+  resetPractice();
+}
+function resetPractice(){ session = null; quiz = null; fadeShown.clear(); render(true); }
+function setRange(from, to){
+  const c = ch();
+  from = Math.min(Math.max(1, from | 0 || 1), c.c);
+  to = Math.min(Math.max(from, to | 0 || from), c.c);
+  S.from = from; S.to = to; saveUI(); resetPractice();
+  $('#from').value = from; $('#to').value = to;
+}
+
+/* ---------- events ---------- */
+document.querySelector('.nav').addEventListener('click', e => {
+  const b = e.target.closest('button[data-mode]'); if (!b) return;
+  S.mode = b.dataset.mode; saveUI(); render(true);
+});
+$('#openPicker').addEventListener('click', () => { $('#search').value = ''; renderPicker(); openSheet('#picker'); const cur = $('#surahList [aria-current="true"]'); if (cur) cur.scrollIntoView({ block: 'center' }); });
+$('#openSettings').addEventListener('click', () => { renderSettings(); openSheet('#settings'); });
+document.querySelectorAll('.sheetwrap').forEach(w => w.addEventListener('click', e => { if (e.target === w || e.target.closest('[data-close]')) closeSheets(); }));
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeSheets(); });
+$('#search').addEventListener('input', renderPicker);
+$('#surahList').addEventListener('click', e => {
+  const b = e.target.closest('[data-pick]'); if (!b) return;
+  selectSurah(+b.dataset.pick); renderPicker();
+});
+$('#picker').addEventListener('click', e => {
+  const st = e.target.closest('[data-step]'); if (!st) return;
+  const [k, d] = st.dataset.step.split(':'); const f = +$('#from').value, t = +$('#to').value;
+  if (k === 'from') setRange(f + +d, Math.max(t, f + +d)); else setRange(Math.min(f, t + +d), t + +d);
+});
+$('#from').addEventListener('change', () => setRange(+$('#from').value, Math.max(+$('#from').value, +$('#to').value)));
+$('#to').addEventListener('change', () => setRange(Math.min(+$('#from').value, +$('#to').value), +$('#to').value));
+$('#whole').addEventListener('click', () => setRange(1, ch().c));
+
+$('#settingsBody').addEventListener('click', e => {
+  const b = e.target.closest('[data-set]');
+  if (b) { S[b.dataset.set] = b.dataset.val; saveUI(); applyLook(); renderSettings(); render(); return; }
+  const id = (e.target.closest('button') || {}).id;
+  if (id === 'installBtn') install();
+  else if (id === 'resetBtn') { confirmReset = true; renderSettings(); }
+  else if (id === 'resetNo') { confirmReset = false; renderSettings(); }
+  else if (id === 'resetYes') {
+    for (const k of Object.keys(progress)) { progress[k] = {}; if (db) pending.add(k); }
+    lsSet(LS_PROG, progress); flush(); confirmReset = false; session = null; renderSettings(); render(); toast(esc(T('resetDone')));
+  }
+  else if (id === 'exportBtn') {
+    const blob = new Blob([JSON.stringify({ app: 'hifz-recall', v: 1, saved: new Date().toISOString(), progress })], { type: 'application/json' });
+    const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `hifz-recall-backup-${today()}.json`;
+    document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+    toast(esc(T('backupSaved')));
+  }
+  else if (id === 'importBtn') $('#importFile').click();
+});
+$('#settingsBody').addEventListener('change', e => { if (e.target.id === 'cueTr') { S.cueTr = e.target.checked; saveUI(); render(); } });
+$('#importFile').addEventListener('change', async e => {
+  const f = e.target.files && e.target.files[0]; e.target.value = '';
+  if (!f) return;
+  try {
+    const d = JSON.parse(await f.text());
+    if (!d || d.app !== 'hifz-recall' || typeof d.progress !== 'object') throw 0;
+    let n = 0;
+    for (const [sid, cs] of Object.entries(d.progress)) {
+      if (!chapters[+sid - 1] || typeof cs !== 'object') continue;
+      const local = cardsFor(sid);
+      for (const [a, c] of Object.entries(cs)) if (c && typeof c.d === 'string' && (!local[a] || (c.t || 0) > (local[a].t || 0))) { local[a] = c; n++; }
+    }
+    lsSet(LS_PROG, progress); session = null; render(); toast(esc(T('backupLoaded', n)));
+  } catch (err) { toast(esc(T('backupBad'))); }
+});
+
+const main = $('#main');
+main.addEventListener('change', e => {
+  if (e.target.id === 'firstLetters') { S.firstLetters = e.target.checked; saveUI(); render(); }
+});
+main.addEventListener('click', e => {
+  const t = e.target;
+  const pl = t.closest('[data-play]'); if (pl) return play(+pl.dataset.play);
+  if (t.closest('#installBtn')) return install();
+  if (t.closest('#reveal')) { session.revealed = true; return render(); }
+  if (t.closest('#hint')) { session.hints++; return render(); }
+  const g = t.closest('.grade'); if (g) return grade(+g.dataset.g);
+  if (t.closest('#againAll')) { startRecall(rangeList()); return render(true); }
+  const lv = t.closest('[data-level]'); if (lv) { S.level = +lv.dataset.level; fadeShown.clear(); saveUI(); return render(); }
+  if (t.closest('#reshuffle')) { S.seed = (S.seed % 9973) + 1; fadeShown.clear(); saveUI(); return render(); }
+  if (t.closest('#hideAgain')) { fadeShown.clear(); return render(); }
+  const gap = t.closest('.w.gap'); if (gap) return revealGap(gap);
+  if (t.closest('#closeWarn')) { storeWarnClosed = true; return render(); }
+  const w = t.closest('.w[data-a]'); if (w) return wordInfo(+w.dataset.a, +w.dataset.i);
+  const o = t.closest('[data-opt]'); if (o) return choose(+o.dataset.opt);
+  if (t.closest('#nextAyah')) return nextAyah();
+  if (t.closest('#restartQuiz') || t.closest('#restartQuiz2')) { startQuiz(); return render(true); }
+  const wk = t.closest('#weakRecall');
+  if (wk) { S.mode = 'recall'; saveUI(); startRecall(wk.dataset.weak.split(',').map(Number)); return render(true); }
+  const m = t.closest('[data-map]');
+  if (m) { const a = +m.dataset.map; S.mode = 'recall'; setRange(a, Math.min(ch().c, a + Math.max(0, S.to - S.from))); return; }
+  const d = t.closest('[data-due]');
+  if (d) {
+    const sid = +d.dataset.due, td = today();
+    const list = Object.entries(progress[sid] || {}).filter(([, c]) => c.d <= td).map(([a]) => +a).sort((x, y) => x - y);
+    S.mode = 'recall'; selectSurah(sid, list[0], list[list.length - 1]);
+  }
+});
+main.addEventListener('keydown', e => {
+  if ((e.key === 'Enter' || e.key === ' ') && e.target.classList.contains('gap')) { e.preventDefault(); fadeShown.add(e.target.dataset.k); render(); }
+});
+document.addEventListener('keydown', e => {
+  if (!surah || e.ctrlKey || e.metaKey || e.altKey || !$('#picker').hidden || !$('#settings').hidden) return;
+  if (/^(INPUT|SELECT|TEXTAREA|BUTTON)$/.test(e.target.tagName) && e.key !== 'h' && !/^[1-4]$/.test(e.key)) return;
+  if (S.mode === 'recall' && session && session.idx < session.queue.length) {
+    if (!session.revealed && (e.key === ' ' || e.key === 'Enter')) { e.preventDefault(); session.revealed = true; render(); }
+    else if (!session.revealed && (e.key === 'h' || e.key === 'H')) { if (session.hints < ayah(session.queue[session.idx]).w.length) { session.hints++; render(); } }
+    else if (session.revealed && /^[1-4]$/.test(e.key)) grade(+e.key - 1);
+  } else if (S.mode === 'next' && quiz && !quiz.done) {
+    if (quiz.wi >= ayah(quiz.list[quiz.ai]).w.length && e.key === 'Enter') { e.preventDefault(); nextAyah(); }
+    else if (/^[1-4]$/.test(e.key) && +e.key <= quiz.opts.length) choose(+e.key - 1);
+  }
+});
+
+/* ---------- boot ---------- */
+if (!chapters[S.surah - 1]) S.surah = 1;
+if (!L[S.lang]) S.lang = 'kk';
+applyLook();
+selectSurah(S.surah, S.from, S.to);
+if (IN_CLAUDE) initCloud();
+else addEventListener('load', () => { if (window.claude && window.claude.use) { IN_CLAUDE = true; render(); initCloud(); } });
+})();
+</script>
