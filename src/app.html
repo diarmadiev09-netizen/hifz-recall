@@ -48,8 +48,8 @@ main{max-width:720px;margin:0 auto;padding-block:16px calc(var(--nav-h) + env(sa
 .card{background:var(--sheet);border:1px solid var(--line);border-radius:16px;padding:16px;display:flex;flex-direction:column;gap:14px;min-width:0}
 
 .nav{position:fixed;left:0;right:0;bottom:0;z-index:20;background:var(--sheet);border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom,0px);padding-left:env(safe-area-inset-left,0px);padding-right:env(safe-area-inset-right,0px)}
-.nav .in{max-width:720px;margin:0 auto;display:grid;grid-template-columns:repeat(4,1fr);height:var(--nav-h)}
-.nav button{border:0;background:transparent;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;font-size:12px;font-weight:600;color:var(--muted);cursor:pointer;padding:4px 2px;min-width:0}
+.nav .in{max-width:720px;margin:0 auto;display:grid;grid-template-columns:repeat(5,1fr);height:var(--nav-h)}
+.nav button{border:0;background:transparent;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;font-size:11px;font-weight:600;color:var(--muted);cursor:pointer;padding:4px 2px;min-width:0}
 .nav button span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
 .nav svg{width:24px;height:24px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 .nav button[aria-current="page"]{color:var(--accent)}
@@ -108,6 +108,16 @@ kbd{font-family:var(--font-ui);font-size:11px;border:1px solid currentColor;bord
 .foot{display:flex;flex-wrap:wrap;gap:4px 14px;align-items:center;justify-content:space-between}
 .listen{display:inline-flex;gap:14px;align-items:center;font-size:14px}
 .linkbtn{border:0;background:none;color:var(--accent);cursor:pointer;padding:6px 0;font-weight:600;font-size:14px}
+.linkbtn.danger{color:var(--again)}
+.progress{height:6px;border-radius:3px;background:var(--line);overflow:hidden}
+.progress i{display:block;height:100%;background:var(--accent);transition:width .2s}
+.transport{display:grid;grid-template-columns:60px 1fr 60px;gap:8px}
+.transport .btn{min-height:52px;padding:6px}
+.transport svg{width:22px;height:22px;flex:none;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.lsa{cursor:pointer;border-radius:12px;padding-inline:8px;margin-inline:-8px}
+.lsa.cur{background:var(--gold-soft);background:color-mix(in srgb,var(--gold-soft) 55%,transparent)}
+.w.hl{background:var(--gold);color:var(--sheet)}
+.pill.turn{background:var(--accent);color:var(--accent-ink)}
 
 .slot{font-family:var(--font-ui);font-size:.7em;display:inline-block;min-width:1.6em;border-bottom:2px solid var(--accent);color:var(--accent);text-align:center;animation:blink 1.2s ease-in-out infinite}
 @keyframes blink{50%{opacity:.35}}
@@ -179,6 +189,7 @@ footer p{margin:0 0 6px}
 
 <nav class="nav" aria-label="Mode">
   <div class="in">
+    <button type="button" data-mode="listen"><svg viewBox="0 0 24 24"><path d="M3 18v-6a9 9 0 0 1 18 0v6"/><path d="M21 19a2 2 0 0 1-2 2h-1v-6h3zM3 19a2 2 0 0 0 2 2h1v-6H3z"/></svg><span data-i="tabListen"></span></button>
     <button type="button" data-mode="recall"><svg viewBox="0 0 24 24"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg><span data-i="tabRecall"></span></button>
     <button type="button" data-mode="fade"><svg viewBox="0 0 24 24"><path d="M4 7h4M11 7h9M4 12h9M16 12h4M4 17h2M9 17h11" stroke-dasharray="0"/></svg><span data-i="tabFade"></span></button>
     <button type="button" data-mode="next"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="8" height="7" rx="2"/><rect x="13" y="4" width="8" height="7" rx="2"/><rect x="3" y="13" width="8" height="7" rx="2"/><rect x="13" y="13" width="8" height="7" rx="2"/></svg><span data-i="tabNext"></span></button>
@@ -267,7 +278,17 @@ const L = {
     noStore:'This browser cannot save progress for a file opened this way. Open the file in Chrome or Firefox, or save a backup in Settings before closing.',
     installTitle:'Install on your phone', installWhy:'Once installed, the app opens from your home screen and works without internet.', installBtn:'Install app',
     iosHint:'In Safari, tap the Share button, then “Add to Home Screen”.', androidHint:'Open the browser menu (⋮) and choose “Install app” or “Add to Home screen”.',
-    installedNote:'Installed. Open it from your home screen, even without internet.', offlineReady:'Saved on this device. Works without internet.', offlinePreparing:'Saving for offline use…'
+    installedNote:'Installed. Open it from your home screen, even without internet.', offlineReady:'Saved on this device. Works without internet.', offlinePreparing:'Saving for offline use…',
+    tabListen:'Listen', reciter:'Recitation · Mishary Alafasy', playBtn:'Play', pause:'Pause', yourTurn:'Your turn',
+    dlBtn: m => `Download for offline · about ${m} MB`, dlRest:(n, m) => `Download the other ${n} āyāt · about ${m} MB`, dlHelp:'Saved recitation plays without internet.',
+    dlProgress:(d, t) => `Saving ${d} of ${t}…`, dlStop:'Stop', dlCount:(d, t) => `${d}/${t} saved`, dlSaved:'✓ Saved on this phone. Plays without internet.', dlDelete:'Delete', tapAgain:'Tap again to delete',
+    dlDone:'Recitation saved. It now plays without internet.', dlFailed: n => `${n} files did not download. Check the connection and tap Download again.`, noSpace:'There is not enough free space on the phone.',
+    dlNoStore:'This browser cannot save audio. Install the app to listen offline.', audioArtifact:'Recitation cannot play inside this page. Open the app:',
+    repeatAyah:'Repeat each āyah', repeatRange:'Repeat the whole range', speed:'Speed', gap:'Pause so I can repeat',
+    gapHelp:'After each āyah the app stays silent for as long as the āyah lasted, so you can recite it back.',
+    lsAyah:(a, r, R) => R > 1 ? `Āyah ${a} · ${r} of ${R}` : `Āyah ${a}`, lsRound:(k, K) => `round ${k} of ${K}`, listenHelp:'Tap Play or an āyah to start.', listenDone:'Listening finished.',
+    noAudioOffline:'No internet, and this āyah’s recitation is not saved. Download the sūrah in the Listen tab.', audioFailed:'The recitation could not be loaded. Try again.',
+    savedAudio:'Saved recitation', savedAudioN: n => `${n} sūrah${n === 1 ? '' : 's'}`, deleteAllAudio:'Delete all saved recitation', audioDeleted:'Saved recitation deleted.'
   },
   ru: {
     tabRecall:'Вспомнить', tabFade:'Пропуски', tabNext:'Слово', tabProgress:'Прогресс',
@@ -303,7 +324,17 @@ const L = {
     noStore:'Этот браузер не может сохранять прогресс для файла, открытого таким способом. Откройте файл в Chrome или Firefox либо сохраните копию в настройках перед закрытием.',
     installTitle:'Установить на телефон', installWhy:'После установки приложение открывается с главного экрана и работает без интернета.', installBtn:'Установить приложение',
     iosHint:'В Safari нажмите «Поделиться», затем «На экран „Домой“».', androidHint:'Откройте меню браузера (⋮) и выберите «Установить приложение» или «Добавить на главный экран».',
-    installedNote:'Установлено. Открывайте с главного экрана, даже без интернета.', offlineReady:'Сохранено на устройстве. Работает без интернета.', offlinePreparing:'Сохранение для работы без интернета…'
+    installedNote:'Установлено. Открывайте с главного экрана, даже без интернета.', offlineReady:'Сохранено на устройстве. Работает без интернета.', offlinePreparing:'Сохранение для работы без интернета…',
+    tabListen:'Слушать', reciter:'Чтец · Мишари Алафаси', playBtn:'Слушать', pause:'Пауза', yourTurn:'Ваша очередь',
+    dlBtn: m => `Скачать для офлайна · около ${m} МБ`, dlRest:(n, m) => `Скачать остальные аяты (${n}) · около ${m} МБ`, dlHelp:'Сохранённое чтение играет без интернета.',
+    dlProgress:(d, t) => `Сохранение: ${d} из ${t}…`, dlStop:'Остановить', dlCount:(d, t) => `сохранено ${d}/${t}`, dlSaved:'✓ Сохранено на телефоне. Играет без интернета.', dlDelete:'Удалить', tapAgain:'Нажмите ещё раз',
+    dlDone:'Чтение сохранено и теперь играет без интернета.', dlFailed: n => `Не скачано файлов: ${n}. Проверьте интернет и нажмите «Скачать» ещё раз.`, noSpace:'На телефоне не хватает свободного места.',
+    dlNoStore:'Этот браузер не может сохранять аудио. Установите приложение, чтобы слушать без интернета.', audioArtifact:'Внутри этой страницы чтение не воспроизводится. Откройте приложение:',
+    repeatAyah:'Повторять каждый аят', repeatRange:'Повторять весь отрезок', speed:'Скорость', gap:'Пауза, чтобы повторить',
+    gapHelp:'После каждого аята приложение молчит столько же, сколько длился аят, чтобы вы повторили его.',
+    lsAyah:(a, r, R) => R > 1 ? `Аят ${a} · ${r} из ${R}` : `Аят ${a}`, lsRound:(k, K) => `круг ${k} из ${K}`, listenHelp:'Нажмите «Слушать» или на аят.', listenDone:'Прослушивание завершено.',
+    noAudioOffline:'Нет интернета, а чтение этого аята не сохранено. Скачайте суру во вкладке «Слушать».', audioFailed:'Не удалось загрузить чтение. Попробуйте ещё раз.',
+    savedAudio:'Сохранённое чтение', savedAudioN: n => `сур: ${n}`, deleteAllAudio:'Удалить всё сохранённое чтение', audioDeleted:'Сохранённое чтение удалено.'
   },
   kk: {
     tabRecall:'Еске түсіру', tabFade:'Бос орын', tabNext:'Сөз', tabProgress:'Үлгерім',
@@ -339,7 +370,17 @@ const L = {
     noStore:'Бұл браузер осылай ашылған файлдың үлгерімін сақтай алмайды. Файлды Chrome немесе Firefox браузерінде ашыңыз, не жабар алдында баптаулардан көшірмесін сақтаңыз.',
     installTitle:'Телефонға орнату', installWhy:'Орнатқаннан кейін қолданба басты экраннан ашылып, интернетсіз жұмыс істейді.', installBtn:'Қолданбаны орнату',
     iosHint:'Safari-де «Бөлісу» (Share / «Поделиться») түймесін басып, «Add to Home Screen» («На экран „Домой“») тармағын таңдаңыз.', androidHint:'Браузер мәзірін (⋮) ашып, «Қолданбаны орнату» немесе «Негізгі экранға қосу» тармағын таңдаңыз.',
-    installedNote:'Орнатылды. Интернет болмаса да, басты экраннан ашыңыз.', offlineReady:'Құрылғыда сақталды. Интернетсіз жұмыс істейді.', offlinePreparing:'Интернетсіз жұмыс үшін сақталуда…'
+    installedNote:'Орнатылды. Интернет болмаса да, басты экраннан ашыңыз.', offlineReady:'Құрылғыда сақталды. Интернетсіз жұмыс істейді.', offlinePreparing:'Интернетсіз жұмыс үшін сақталуда…',
+    tabListen:'Тыңдау', reciter:'Қари · Мишари Әлафаси', playBtn:'Тыңдау', pause:'Кідірту', yourTurn:'Сіздің кезегіңіз',
+    dlBtn: m => `Офлайн үшін жүктеу · шамамен ${m} МБ`, dlRest:(n, m) => `Қалған ${n} аятты жүктеу · шамамен ${m} МБ`, dlHelp:'Сақталған қираат интернетсіз ойнайды.',
+    dlProgress:(d, t) => `Сақталуда: ${d}/${t}…`, dlStop:'Тоқтату', dlCount:(d, t) => `сақталды ${d}/${t}`, dlSaved:'✓ Телефонда сақталды. Интернетсіз ойнайды.', dlDelete:'Жою', tapAgain:'Жою үшін тағы басыңыз',
+    dlDone:'Қираат сақталды, енді интернетсіз ойнайды.', dlFailed: n => `${n} файл жүктелмеді. Интернетті тексеріп, қайта жүктеңіз.`, noSpace:'Телефонда бос орын жеткіліксіз.',
+    dlNoStore:'Бұл браузер аудионы сақтай алмайды. Интернетсіз тыңдау үшін қолданбаны орнатыңыз.', audioArtifact:'Бұл бетте қираат ойнатылмайды. Қолданбаны ашыңыз:',
+    repeatAyah:'Әр аятты қайталау', repeatRange:'Бүкіл аралықты қайталау', speed:'Жылдамдық', gap:'Қайталауға үзіліс',
+    gapHelp:'Әр аяттан кейін қолданба аят қанша созылса, сонша үнсіз тұрады, сол уақытта оны қайталайсыз.',
+    lsAyah:(a, r, R) => R > 1 ? `${a}-аят · ${r}/${R}` : `${a}-аят`, lsRound:(k, K) => `айналым ${k}/${K}`, listenHelp:'«Тыңдау» түймесін не аятты басыңыз.', listenDone:'Тыңдау аяқталды.',
+    noAudioOffline:'Интернет жоқ, ал бұл аяттың қираты сақталмаған. Сүрені «Тыңдау» бөлімінде жүктеп алыңыз.', audioFailed:'Қираат жүктелмеді. Қайталап көріңіз.',
+    savedAudio:'Сақталған қираат', savedAudioN: n => `${n} сүре`, deleteAllAudio:'Сақталған қираатты түгел жою', audioDeleted:'Сақталған қираат жойылды.'
   }
 };
 const LANGS = [['kk','Қазақша'],['ru','Русский'],['en','English']];
@@ -438,7 +479,7 @@ function loadSurah(id){
 
 /* ---------- UI state ---------- */
 const navLang = ((navigator.languages && navigator.languages[0]) || navigator.language || 'kk').slice(0, 2);
-const S = Object.assign({ lang: L[navLang] ? navLang : 'kk', tr: 'auto', size: 'M', theme: 'auto', surah: 1, from: 1, to: 7, mode: 'recall', cueTr: false, level: 0.5, firstLetters: false, seed: 1 }, lsGet('hifz.ui', {}));
+const S = Object.assign({ lang: L[navLang] ? navLang : 'kk', tr: 'auto', size: 'M', theme: 'auto', surah: 1, from: 1, to: 7, mode: 'recall', cueTr: false, level: 0.5, firstLetters: false, seed: 1, repA: 3, repR: 1, speed: 1, gap: false }, lsGet('hifz.ui', {}));
 const saveUI = () => lsSet('hifz.ui', S);
 const SIZES = { S: 26, M: 32, L: 38, XL: 46 };
 let surah = null, session = null, quiz = null, confirmReset = false;
@@ -471,24 +512,297 @@ function tailHTML(v, k = 8){
 let toastTimer;
 function toast(html){ const t = $('#toast'); t.innerHTML = html; t.hidden = false; clearTimeout(toastTimer); toastTimer = setTimeout(() => t.hidden = true, 4500); }
 
-/* ---------- audio: streams from Quran.com when online ---------- */
-let audioBlocked = false;
+/* ---------- recitation audio: saved on the phone (IndexedDB) or streamed from Quran.com ---------- */
+const AUDIO_BASE = 'https://verses.quran.com/Alafasy/mp3/';
+const APP_URL = 'https://diarmadiev09-netizen.github.io/hifz-recall/';
+const BYTES_PER_MS = 16.1;  // the Alafasy files are 128 kbit/s
+const akey = (s, a) => String(s).padStart(3, '0') + String(a).padStart(3, '0');
+const saved = new Set();    // keys of āyāt whose recitation is saved on this device
+let audioBlocked = false, audioStoreOK = false, audioDB = null, DL = null;
+function openAudioDB(){
+  if (!audioDB) audioDB = new Promise((resolve, reject) => {
+    const r = indexedDB.open('hifz-audio', 1);
+    r.onupgradeneeded = () => r.result.createObjectStore('ayah');
+    r.onsuccess = () => resolve(r.result);
+    r.onerror = () => reject(r.error);
+  });
+  return audioDB;
+}
+function idb(mode, fn){
+  return openAudioDB().then(d => new Promise((resolve, reject) => {
+    const t = d.transaction('ayah', mode), req = fn(t.objectStore('ayah'));
+    t.oncomplete = () => resolve(req && req.result);
+    t.onerror = t.onabort = () => reject(t.error);
+  }));
+}
+const savedIn = s => { let n = 0; for (let a = 1; a <= chapters[s - 1].c; a++) if (saved.has(akey(s, a))) n++; return n; };
+const mbText = bytes => (bytes / 1e6).toFixed(bytes < 1e7 ? 1 : 0);
+// iPhone Safari only lets an audio element play after it has once started inside a tap. Loading a saved file
+// takes a moment, so each element is unlocked with a tenth of a second of silence the first time it is tapped.
+const SILENCE = (() => {
+  const n = 800, b = new Uint8Array(44 + n), v = new DataView(b.buffer);
+  const put = (o, s) => { for (let i = 0; i < s.length; i++) b[o + i] = s.charCodeAt(i); };
+  put(0, 'RIFF'); v.setUint32(4, 36 + n, true); put(8, 'WAVEfmt '); v.setUint32(16, 16, true); v.setUint16(20, 1, true); v.setUint16(22, 1, true);
+  v.setUint32(24, 8000, true); v.setUint32(28, 8000, true); v.setUint16(32, 1, true); v.setUint16(34, 8, true); put(36, 'data'); v.setUint32(40, n, true);
+  b.fill(128, 44);
+  return URL.createObjectURL(new Blob([b], { type: 'audio/wav' }));
+})();
+function unlock(el){ if (el._unlocked) return; el._unlocked = true; el.src = SILENCE; const p = el.play(); if (p) p.catch(() => {}); }
+const estimateMB = s => mbText(loadSurah(s).reduce((ms, v) => ms + (saved.has(akey(s, v.n)) ? 0 : v.d || 0), 0) * BYTES_PER_MS);
+
+// Points an audio element at the saved file when there is one, otherwise at Quran.com. False when neither is possible.
+async function setSrc(el, s, a){
+  const k = akey(s, a);
+  if (saved.has(k)) {
+    try {
+      const blob = await idb('readonly', st => st.get(k));
+      if (blob) { if (el._blob) URL.revokeObjectURL(el._blob); el._blob = URL.createObjectURL(blob); el.src = el._blob; return true; }
+    } catch(e){}
+  }
+  if (!navigator.onLine) return false;
+  el.src = AUDIO_BASE + k + '.mp3';
+  return true;
+}
+
+// Single āyah playback for the Listen links in the other modes.
 const player = new Audio();
 function listen(v){
   const link = `<a href="${qlink(S.surah, v.n)}" target="_blank" rel="noopener">Quran.com ↗</a>`;
   if (audioBlocked) return `<span class="listen">${link}</span>`;
   return `<span class="listen"><button class="linkbtn" data-play="${v.n}" type="button">${T('play')}</button>${link}</span>`;
 }
-function play(n){
-  if (!navigator.onLine) return toast(esc(T('needNet')));
-  player.src = `https://verses.quran.com/Alafasy/mp3/${String(S.surah).padStart(3, '0')}${String(n).padStart(3, '0')}.mp3`;
+async function play(n){
+  unlock(player);
+  if (LP.playing) lpToggle();
+  if (!await setSrc(player, S.surah, n)) return toast(esc(T('noAudioOffline')));
   player.play().catch(() => {});
 }
 player.addEventListener('error', () => {
-  if (!navigator.onLine) return toast(esc(T('needNet')));
-  if (!IN_CLAUDE) return toast(esc(T('needNet')));
-  audioBlocked = true; toast(esc(T('audioBlocked'))); render();
+  if (IN_CLAUDE) { audioBlocked = true; toast(esc(T('audioBlocked'))); render(); }
+  else toast(esc(T(navigator.onLine ? 'audioFailed' : 'noAudioOffline')));
 });
+
+/* downloads: one sūrah at a time, four files in parallel */
+async function downloadSurah(s){
+  if (DL) return;
+  const todo = loadSurah(s).map(v => v.n).filter(a => !saved.has(akey(s, a)));
+  DL = { s, done: chapters[s - 1].c - todo.length, total: chapters[s - 1].c, failed: 0, stop: false, user: false, full: false };
+  updateDL();
+  let next = 0;
+  const worker = async () => {
+    while (!DL.stop && next < todo.length) {
+      const k = akey(s, todo[next++]);
+      try {
+        const r = await fetch(AUDIO_BASE + k + '.mp3');
+        if (!r.ok) throw new Error(r.status);
+        const blob = await r.blob();
+        await idb('readwrite', st => st.put(blob, k));
+        saved.add(k); DL.done++;
+      } catch (e) {
+        DL.failed++;
+        if (e && e.name === 'QuotaExceededError') { DL.full = true; DL.stop = true; }
+        else if (!navigator.onLine) DL.stop = true;
+      }
+      updateDL();
+    }
+  };
+  await Promise.all([worker(), worker(), worker(), worker()]);
+  const d = DL; DL = null;
+  updateDL();
+  if (!d.user) toast(esc(d.full ? T('noSpace') : d.failed ? T('dlFailed', d.failed) : T('dlDone')));
+}
+async function deleteAudio(s){
+  if (s) await idb('readwrite', st => st.delete(IDBKeyRange.bound(akey(s, 0), akey(s, 999))));
+  else await idb('readwrite', st => st.clear());
+  for (const k of [...saved]) if (!s || k.startsWith(akey(s, 0).slice(0, 3))) saved.delete(k);
+  toast(esc(T('audioDeleted')));
+}
+// Destructive buttons need a second tap within four seconds.
+function armed(btn){
+  if (btn.dataset.armed) return true;
+  const label = btn.textContent;
+  btn.dataset.armed = '1'; btn.textContent = T('tapAgain');
+  setTimeout(() => { if (btn.isConnected) { delete btn.dataset.armed; btn.textContent = label; } }, 4000);
+  return false;
+}
+function dlCardInner(){
+  const s = S.surah, c = ch(), have = savedIn(s);
+  const h = `<div class="spread"><span class="label">${T('reciter')}</span>${have && have < c.c ? `<span class="meta">${T('dlCount', have, c.c)}</span>` : ''}</div>`;
+  if (IN_CLAUDE) return h + `<p class="meta" style="margin:0">${T('audioArtifact')} <a href="${APP_URL}" target="_blank" rel="noopener">${APP_URL.replace('https://', '')}</a></p>`;
+  if (DL && DL.s === s) return h + `<div class="progress"><i style="width:${Math.round(DL.done / DL.total * 100)}%"></i></div>
+    <div class="spread"><span class="meta">${T('dlProgress', DL.done, DL.total)}</span><button class="linkbtn" id="dlStop" type="button">${T('dlStop')}</button></div>`;
+  if (!audioStoreOK) return h + `<p class="meta" style="margin:0">${T('dlNoStore')}</p>`;
+  if (have === c.c) return h + `<div class="spread"><span>${T('dlSaved')}</span><button class="linkbtn danger" id="dlDelete" type="button">${T('dlDelete')}</button></div>`;
+  return h + `<button class="btn primary block" id="dlStart" type="button" ${DL ? 'disabled' : ''}>${have ? T('dlRest', c.c - have, estimateMB(s)) : T('dlBtn', estimateMB(s))}</button>
+    <p class="meta" style="margin:0">${T('dlHelp')}</p>`;
+}
+function updateDL(){ const el = document.getElementById('dlCard'); if (el) el.innerHTML = dlCardInner(); }
+
+/* Listen player: repeats each āyah and the range, can leave a silent turn to recite back, highlights the word being read */
+const ICON = p => `<svg viewBox="0 0 24 24" aria-hidden="true">${p}</svg>`;
+const ICON_PLAY = ICON('<path d="M7 4.5v15l12.5-7.5z" fill="currentColor" stroke="none"/>');
+const ICON_PAUSE = ICON('<path d="M6.5 4.5H10v15H6.5zM14 4.5h3.5v15H14z" fill="currentColor" stroke="none"/>');
+const ICON_PREV = ICON('<path d="M18 5v14L8 12zM6 5v14"/>');
+const ICON_NEXT = ICON('<path d="M6 5v14l10-7zM18 5v14"/>');
+const LP = { el: new Audio(), list: [], idx: 0, rep: 1, round: 1, playing: false, turn: false, timer: 0, raf: 0, word: null, hl: '', lock: null };
+const lpAyah = () => LP.list[LP.idx];
+function lpStatus(){
+  if (!LP.list.length) return T('listenHelp');
+  let s = T('lsAyah', lpAyah(), LP.rep, S.repA);
+  if (S.repR !== 1) s += ' · ' + T('lsRound', LP.round, S.repR || '∞');
+  return s;
+}
+function lpStart(i){
+  unlock(LP.el);
+  player.pause();
+  LP.list = rangeList();
+  LP.idx = Math.max(0, Math.min(i || 0, LP.list.length - 1));
+  LP.rep = 1; LP.round = 1; LP.turn = false; clearTimeout(LP.timer);
+  LP.playing = true; lpWake(true); lpLoad();
+}
+async function lpLoad(){
+  LP.turn = false;
+  if (!await setSrc(LP.el, S.surah, lpAyah())) { lpStop(); toast(esc(T('noAudioOffline'))); return; }
+  LP.el.defaultPlaybackRate = LP.el.playbackRate = S.speed;
+  lpMedia(); lpPlayEl(); lpUI(true);
+}
+function lpPlayEl(){
+  LP.el.play().then(() => { LP.el.playbackRate = S.speed; lpTick(); }).catch(err => {
+    if (err && err.name === 'AbortError') return;  // a newer load replaced this one
+    lpStop(); toast(esc(T(navigator.onLine ? 'audioFailed' : 'noAudioOffline')));
+  });
+}
+function lpAdvance(){
+  LP.turn = false;
+  if (!LP.playing) return;
+  if (LP.rep < S.repA) { LP.rep++; LP.el.currentTime = 0; lpPlayEl(); lpUI(); return; }
+  LP.rep = 1; LP.idx++;
+  if (LP.idx >= LP.list.length) {
+    if (S.repR === 0 || LP.round < S.repR) { LP.round++; LP.idx = 0; }
+    else { lpStop(); LP.idx = 0; lpUI(); toast(esc(T('listenDone'))); return; }
+  }
+  lpLoad();
+}
+LP.el.addEventListener('ended', () => {
+  if (LP.el.currentSrc === SILENCE) return;
+  cancelAnimationFrame(LP.raf); lpHighlight(-1);
+  if (S.gap && LP.playing) { LP.turn = true; lpUI(); LP.timer = setTimeout(lpAdvance, (LP.el.duration || 3) * 1000 + 600); }
+  else lpAdvance();
+});
+LP.el.addEventListener('error', () => {
+  if (!LP.playing || LP.el.currentSrc === SILENCE) return;
+  lpStop();
+  if (IN_CLAUDE) { audioBlocked = true; toast(esc(T('audioBlocked'))); }
+  else toast(esc(T(navigator.onLine ? 'audioFailed' : 'noAudioOffline')));
+});
+function lpToggle(){
+  unlock(LP.el);
+  if (LP.playing) { LP.playing = false; LP.el.pause(); clearTimeout(LP.timer); cancelAnimationFrame(LP.raf); lpWake(false); lpUI(); return; }
+  const list = rangeList();
+  if (!LP.list.length || LP.list[0] !== list[0] || LP.list.length !== list.length) return lpStart(0);
+  LP.playing = true; lpWake(true);
+  if (LP.turn) lpAdvance();
+  else if ([null, '', SILENCE].includes(LP.el.getAttribute('src'))) lpLoad();
+  else { lpPlayEl(); lpUI(); }
+}
+function lpStop(){
+  LP.playing = false; LP.turn = false;
+  clearTimeout(LP.timer); cancelAnimationFrame(LP.raf);
+  LP.el.pause(); lpWake(false); lpHighlight(-1); lpUI();
+}
+function lpStep(d){
+  if (!LP.list.length) LP.list = rangeList();
+  LP.idx = Math.max(0, Math.min(LP.list.length - 1, LP.idx + d));
+  LP.rep = 1; LP.turn = false; clearTimeout(LP.timer);
+  if (LP.playing) lpLoad();
+  else { LP.el.removeAttribute('src'); lpUI(true); }
+}
+// Highlights the word whose timing covers the current playback position.
+function lpTick(){
+  cancelAnimationFrame(LP.raf);
+  const step = () => {
+    if (!LP.playing || LP.turn || LP.el.paused) return;
+    const v = ayah(lpAyah()), tm = v && v.t, now = LP.el.currentTime * 1000;
+    let w = -1;
+    if (tm) {
+      for (let i = 0; i < v.w.length; i++) if (tm[2 * i] >= 0 && tm[2 * i] <= now) w = i;
+      if (w >= 0 && now > tm[2 * w + 1] + 300) w = -1;
+    }
+    lpHighlight(w);
+    LP.raf = requestAnimationFrame(step);
+  };
+  LP.raf = requestAnimationFrame(step);
+}
+function lpHighlight(w){
+  const key = w < 0 ? '' : lpAyah() + ':' + w;
+  if (key === LP.hl && (!LP.word || LP.word.isConnected)) return;
+  if (LP.word) LP.word.classList.remove('hl');
+  LP.word = null; LP.hl = key;
+  if (!key) return;
+  const el = document.querySelector(`#lsAyat [data-la="${lpAyah()}"] [data-wi="${w}"]`);
+  if (el) { el.classList.add('hl'); LP.word = el; }
+}
+function lpUI(scroll){
+  const st = document.getElementById('lsStatus');
+  if (!st) return;  // the Listen view is not on screen
+  st.textContent = lpStatus();
+  $('#lsTurn').hidden = !LP.turn;
+  $('#lsPlay').innerHTML = LP.playing ? ICON_PAUSE + T('pause') : ICON_PLAY + T('playBtn');
+  document.querySelectorAll('#lsAyat .cur').forEach(e => e.classList.remove('cur'));
+  const cur = LP.list.length && document.querySelector(`#lsAyat [data-la="${lpAyah()}"]`);
+  if (cur) {
+    cur.classList.add('cur');
+    if (scroll) cur.scrollIntoView({ block: 'center', behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
+  }
+}
+function lpMedia(){
+  if (!('mediaSession' in navigator)) return;
+  try {
+    navigator.mediaSession.metadata = new MediaMetadata({ title: `${ch().n} · ${lpAyah()}`, artist: 'Mishary Rashid Alafasy', album: 'Hifz Recall',
+      artwork: PWA ? [{ src: 'icon-512.png', sizes: '512x512', type: 'image/png' }] : [] });
+  } catch(e){}
+}
+if ('mediaSession' in navigator) {
+  const on = (k, f) => { try { navigator.mediaSession.setActionHandler(k, f); } catch(e){} };
+  on('play', () => { if (!LP.playing) lpToggle(); });
+  on('pause', () => { if (LP.playing) lpToggle(); });
+  on('previoustrack', () => lpStep(-1));
+  on('nexttrack', () => lpStep(1));
+}
+// Keeps the screen on while listening, where the browser allows it.
+async function lpWake(on){
+  try {
+    if (on && !LP.lock && navigator.wakeLock && document.visibilityState === 'visible') {
+      LP.lock = await navigator.wakeLock.request('screen');
+      LP.lock.addEventListener('release', () => { LP.lock = null; });
+    } else if (!on && LP.lock) { const l = LP.lock; LP.lock = null; await l.release(); }
+  } catch(e){ LP.lock = null; }
+}
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible' && LP.playing) lpWake(true); });
+function renderListen(){
+  const sg = (k, opts) => `<div class="seg" role="group">${opts.map(([v, l]) => `<button type="button" data-ls="${k}" data-val="${v}" aria-pressed="${S[k] === v}">${l}</button>`).join('')}</div>`;
+  let html = `<section class="card" id="dlCard">${dlCardInner()}</section>
+    <section class="card">
+      <div class="group"><span class="label">${T('repeatAyah')}</span>${sg('repA', [[1, '1×'], [3, '3×'], [5, '5×'], [10, '10×']])}</div>
+      <div class="group"><span class="label">${T('repeatRange')}</span>${sg('repR', [[1, '1×'], [2, '2×'], [3, '3×'], [0, '∞']])}</div>
+      <div class="group"><span class="label">${T('speed')}</span>${sg('speed', [[0.75, '0.75×'], [1, '1×'], [1.25, '1.25×']])}</div>
+      <label class="toggle">${T('gap')}<input type="checkbox" id="lsGap" ${S.gap ? 'checked' : ''}></label>
+      <p class="meta" style="margin:0">${T('gapHelp')}</p></section>
+    <section class="card" id="lsAyat">`;
+  for (const a of rangeList()) {
+    const v = ayah(a), tr = trText(v);
+    let words = v.h ? '<span class="hz">۞</span> ' : '';
+    v.w.forEach((w, i) => { words += `<span class="w" data-wi="${i}">${esc(w)}</span>` + (i < v.w.length - 1 ? sep(v, i) : ''); });
+    html += `<div class="ayah lsa" data-la="${a}" role="button" tabindex="0"><p class="ar" lang="ar">${words} ${endMark(a)}</p>${tr ? `<p class="tr">${esc(tr)}</p>` : ''}</div>`;
+  }
+  return html + `</section><div class="dock"><div class="spread"><span class="meta" id="lsStatus"></span><span class="pill turn" id="lsTurn" hidden>${T('yourTurn')}</span></div>
+    <div class="transport"><button class="btn" id="lsPrev" type="button" aria-label="${T('prevAyah')}">${ICON_PREV}</button>
+    <button class="btn primary" id="lsPlay" type="button"></button>
+    <button class="btn" id="lsNext" type="button" aria-label="${T('nextAyah')}">${ICON_NEXT}</button></div></div>`;
+}
+if (!IN_CLAUDE && window.indexedDB) idb('readonly', st => st.getAllKeys()).then(keys => {
+  keys.forEach(k => saved.add(k)); audioStoreOK = true; updateDL();
+}).catch(() => {});
 
 /* ---------- install as an app (web build only) ---------- */
 const IS_IOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
@@ -715,12 +1029,19 @@ function renderSettings(){
       <p class="ar" lang="ar" style="text-align:center">${BASMALA}</p></div>
     <div class="group"><span class="label">${T('theme')}</span>${seg('theme', [['auto', T('auto')], ['light', T('light')], ['dark', T('dark')]], S.theme)}</div>`;
   if (PWA) html += `<div class="group">${installHTML()}</div>`;
+  const audioSurahs = new Set([...saved].map(k => k.slice(0, 3))).size;
+  if (audioSurahs) html += `<div class="group"><span class="label">${T('savedAudio')}</span><p class="meta" style="margin:0" id="audioUsage">${T('savedAudioN', audioSurahs)}</p>
+      <button class="btn danger" id="audioDelAll" type="button">${T('deleteAllAudio')}</button></div>`;
   if (!IN_CLAUDE) html += `<div class="group"><span class="label">${T('backup')}</span><p class="meta" style="margin:0">${T('backupHelp')}</p>
       <div class="row"><button class="btn" id="exportBtn" type="button">${T('saveBackup')}</button><button class="btn" id="importBtn" type="button">${T('loadBackup')}</button></div></div>`;
   html += confirmReset
     ? `<div class="group"><p style="margin:0">${T('resetAsk')}</p><div class="row"><button class="btn danger" id="resetYes" type="button">${T('yesDelete')}</button><button class="btn" id="resetNo" type="button">${T('cancel')}</button></div></div>`
     : `<button class="btn danger block" id="resetBtn" type="button">${T('reset')}</button>`;
   $('#settingsBody').innerHTML = html;
+  if (audioSurahs) idb('readonly', st => st.getAll()).then(blobs => {
+    const el = document.getElementById('audioUsage');
+    if (el) el.textContent = `${T('savedAudioN', audioSurahs)} · ${mbText(blobs.reduce((n, b) => n + (b ? b.size : 0), 0))} MB`;
+  }).catch(() => {});
 }
 
 /* ---------- sūrah picker ---------- */
@@ -751,8 +1072,10 @@ function render(scrollTop){
   document.querySelectorAll('.nav button').forEach(b => { if (b.dataset.mode === S.mode) b.setAttribute('aria-current', 'page'); else b.removeAttribute('aria-current'); });
   const warn = !CAN_STORE && !IN_CLAUDE && !storeWarnClosed
     ? `<section class="card warn"><p style="margin:0">${T('noStore')}</p><button class="btn" id="closeWarn" type="button">OK</button></section>` : '';
-  $('#main').innerHTML = warn + (S.mode === 'recall' ? renderRecall() : S.mode === 'fade' ? renderFade() : S.mode === 'next' ? renderNext() : renderProgress());
+  const views = { listen: renderListen, recall: renderRecall, fade: renderFade, next: renderNext, progress: renderProgress };
+  $('#main').innerHTML = warn + (views[S.mode] || renderRecall)();
   if (scrollTop) window.scrollTo({ top: 0 });
+  if (S.mode === 'listen') { LP.word = null; LP.hl = ''; lpUI(); }
 }
 function selectSurah(id, from, to){
   S.surah = id;
@@ -763,7 +1086,7 @@ function selectSurah(id, from, to){
   surah = loadSurah(id);
   resetPractice();
 }
-function resetPractice(){ session = null; quiz = null; fadeShown.clear(); render(true); }
+function resetPractice(){ session = null; quiz = null; fadeShown.clear(); lpStop(); LP.list = []; LP.el.removeAttribute('src'); render(true); }
 function setRange(from, to){
   const c = ch();
   from = Math.min(Math.max(1, from | 0 || 1), c.c);
@@ -800,6 +1123,7 @@ $('#settingsBody').addEventListener('click', e => {
   if (b) { S[b.dataset.set] = b.dataset.val; saveUI(); applyLook(); renderSettings(); render(); return; }
   const id = (e.target.closest('button') || {}).id;
   if (id === 'installBtn') install();
+  else if (id === 'audioDelAll') { if (armed(e.target.closest('button'))) deleteAudio(0).then(() => { renderSettings(); updateDL(); }, () => {}); }
   else if (id === 'resetBtn') { confirmReset = true; renderSettings(); }
   else if (id === 'resetNo') { confirmReset = false; renderSettings(); }
   else if (id === 'resetYes') {
@@ -834,10 +1158,25 @@ $('#importFile').addEventListener('change', async e => {
 const main = $('#main');
 main.addEventListener('change', e => {
   if (e.target.id === 'firstLetters') { S.firstLetters = e.target.checked; saveUI(); render(); }
+  if (e.target.id === 'lsGap') { S.gap = e.target.checked; saveUI(); }
 });
 main.addEventListener('click', e => {
   const t = e.target;
   const pl = t.closest('[data-play]'); if (pl) return play(+pl.dataset.play);
+  if (t.closest('#lsPlay')) return lpToggle();
+  if (t.closest('#lsPrev')) return lpStep(-1);
+  if (t.closest('#lsNext')) return lpStep(1);
+  const ls = t.closest('[data-ls]');
+  if (ls) {
+    S[ls.dataset.ls] = +ls.dataset.val; saveUI();
+    LP.el.defaultPlaybackRate = LP.el.playbackRate = S.speed;
+    return render();
+  }
+  const la = t.closest('.lsa'); if (la) return lpStart(rangeList().indexOf(+la.dataset.la));
+  if (t.closest('#dlStart')) return downloadSurah(S.surah);
+  if (t.closest('#dlStop')) { if (DL) { DL.stop = true; DL.user = true; } return; }
+  const del = t.closest('#dlDelete');
+  if (del) { if (armed(del)) deleteAudio(S.surah).then(updateDL, () => {}); return; }
   if (t.closest('#installBtn')) return install();
   if (t.closest('#reveal')) { session.revealed = true; return render(); }
   if (t.closest('#hint')) { session.hints++; return render(); }
@@ -864,12 +1203,14 @@ main.addEventListener('click', e => {
   }
 });
 main.addEventListener('keydown', e => {
-  if ((e.key === 'Enter' || e.key === ' ') && e.target.classList.contains('gap')) { e.preventDefault(); fadeShown.add(e.target.dataset.k); render(); }
+  if ((e.key === 'Enter' || e.key === ' ') && e.target.classList.contains('gap')) { e.preventDefault(); revealGap(e.target); }
+  if (e.key === 'Enter' && e.target.classList.contains('lsa')) { e.preventDefault(); lpStart(rangeList().indexOf(+e.target.dataset.la)); }
 });
 document.addEventListener('keydown', e => {
   if (!surah || e.ctrlKey || e.metaKey || e.altKey || !$('#picker').hidden || !$('#settings').hidden) return;
   if (/^(INPUT|SELECT|TEXTAREA|BUTTON)$/.test(e.target.tagName) && e.key !== 'h' && !/^[1-4]$/.test(e.key)) return;
-  if (S.mode === 'recall' && session && session.idx < session.queue.length) {
+  if (S.mode === 'listen' && e.key === ' ' && !/^(INPUT|BUTTON)$/.test(e.target.tagName)) { e.preventDefault(); lpToggle(); }
+  else if (S.mode === 'recall' && session && session.idx < session.queue.length) {
     if (!session.revealed && (e.key === ' ' || e.key === 'Enter')) { e.preventDefault(); session.revealed = true; render(); }
     else if (!session.revealed && (e.key === 'h' || e.key === 'H')) { if (session.hints < ayah(session.queue[session.idx]).w.length) { session.hints++; render(); } }
     else if (session.revealed && /^[1-4]$/.test(e.key)) grade(+e.key - 1);

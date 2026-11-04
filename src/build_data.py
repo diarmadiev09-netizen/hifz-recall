@@ -14,7 +14,7 @@ def kk(t):
     return t
 def ru(t): return ws(re.sub(r"<[^>]+>", "", t))
 chapters = json.load(open(os.path.join(src, "chapters.json"), encoding="utf8"))
-data, stats = {}, {"verses": 0, "words": 0, "kk_slash_left": 0, "empty": 0, "hizb": 0, "joins": 0}
+data, stats = {}, {"verses": 0, "words": 0, "kk_slash_left": 0, "empty": 0, "hizb": 0, "joins": 0, "untimed_words": 0}
 for c in chapters:
     vs = []
     for v in json.load(open(os.path.join(src, f"raw{c['id']}.json"), encoding="utf8")):
@@ -41,6 +41,12 @@ for c in chapters:
                "a": (v.get("audio") or {}).get("url", ""), "pg": v["page_number"], "j": v["juz_number"]}
         if any(J): row["J"] = J
         if h: row["h"] = 1; stats["hizb"] += 1
+        # Alafasy word timings as a flat [start, end, start, end, …] list in ms, -1 where a word has none.
+        T = [-1] * (2 * len(W))
+        for _, p, start, end in (v.get("audio") or {}).get("segments") or []:
+            if 1 <= p <= len(W): T[2 * p - 2], T[2 * p - 1] = start, end
+        if max(T) > 0: row["t"] = T; row["d"] = max(T)
+        stats["untimed_words"] += T[0::2].count(-1)
         for k in ("en", "ru", "kk"):
             if not row[k]: stats["empty"] += 1
         if "/" in row["kk"]: stats["kk_slash_left"] += 1

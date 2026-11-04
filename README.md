@@ -10,10 +10,11 @@ Interface in Kazakh, Russian and English.
 - **Android (Chrome):** open the app link, then tap **Install app** (or browser menu ⋮ → Install app).
 - **iPhone (Safari):** open the app link, tap **Share** → **Add to Home Screen**.
 
-After the first visit the app works fully offline. Listening to recitation needs internet.
+After the first visit the app works fully offline. Recitation plays offline for sūrahs you download in the Listen tab.
 
 ## Practice modes
 
+- **Listen:** Mishary Alafasy's recitation with each word highlighted as it is read. Repeat every āyah 1–10 times and the range 1–3 times or endlessly, slow it down, and turn on a pause after each āyah to recite it back. Download a sūrah once to play it without internet.
 - **Recall:** see the end of the previous āyah, recite the next one from memory, reveal it and grade yourself. Your grade schedules the next review.
 - **Fade:** the chosen range with a share of its words hidden (25–100%), optionally showing first letters. Tap a gap to check it.
 - **Next word:** build each āyah by picking the next word from four options. Āyāt with slips can be sent to Recall.
