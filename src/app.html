@@ -168,6 +168,22 @@ kbd{font-family:var(--font-ui);font-size:11px;border:1px solid currentColor;bord
 
 .toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(var(--nav-h) + env(safe-area-inset-bottom,0px) + 12px);z-index:50;background:var(--ink);color:var(--paper);padding:10px 16px;border-radius:12px;font-size:15px;width:max-content;max-width:calc(100% - 32px);box-shadow:0 6px 20px rgba(0,0,0,.25);display:flex;gap:12px;align-items:center}
 .toast .ar{font-size:26px;line-height:1.6;color:var(--paper)}
+.wc{--font-ar-ui:"Noto Naskh Arabic","Geeza Pro","Segoe UI","Tahoma",sans-serif}
+.wc-word{font-family:var(--font-ar);font-size:calc(var(--ar-size) * 1.25);line-height:1.6;text-align:center;margin:0;direction:rtl}
+.wc-gloss{margin:0;text-align:center;color:var(--muted);font-size:14px}
+.wc-gloss small,.wc dd small{display:block;color:var(--muted);font-size:12px}
+.wc-sec{display:flex;flex-direction:column;gap:8px;border-top:1px solid var(--line);padding-top:12px}
+.wc-sec h3{margin:0;font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--gold)}
+.wc dl{display:grid;grid-template-columns:minmax(90px,auto) 1fr;gap:8px 12px;margin:0}
+.wc-row{display:contents}
+.wc dt{color:var(--muted);font-size:13px}
+.wc dt span{display:block;font-family:var(--font-ar-ui);font-size:12px}
+.wc dd{margin:0;text-align:right;min-width:0}
+.wc-ar{font-family:var(--font-ar-ui);font-size:18px;direction:rtl;display:block}
+.irab{margin:0;padding-right:18px;font-family:var(--font-ar-ui);font-size:17px;line-height:1.8}
+.irab b{color:var(--accent)}
+.wc-src{margin:0;font-size:12px}
+.wpop{position:fixed;z-index:45;width:min(380px,calc(100vw - 24px));max-height:70vh;overflow:auto;background:var(--sheet);border:1px solid var(--line);border-radius:14px;box-shadow:0 10px 30px rgba(0,0,0,.18);padding:12px 14px;display:flex;flex-direction:column;gap:10px}
 footer{font-size:13px;color:var(--muted)}
 footer p{margin:0 0 6px}
 </style>
@@ -211,6 +227,14 @@ footer p{margin:0 0 6px}
     </div>
   </div>
 </div>
+
+<div class="sheetwrap" id="wordSheet" hidden role="dialog" aria-modal="true" aria-labelledby="wordTitle">
+  <div class="sheet">
+    <header><h2 id="wordTitle"></h2><button class="btn primary" type="button" data-close data-i="done"></button></header>
+    <div class="body wc" id="wordBody"></div>
+  </div>
+</div>
+<div class="wpop wc" id="wordPop" hidden></div>
 
 <div class="sheetwrap" id="settings" hidden role="dialog" aria-modal="true" aria-labelledby="settingsTitle">
   <div class="sheet">
@@ -258,7 +282,7 @@ const L = {
     sessionDone:'Session complete', nothingDue:(a,b) => `Nothing due in āyāt ${a}–${b}`, nextReview: d => `Next review in this range: ${d}.`,
     anyway:'You can still recite the whole range now. It will be rescheduled by how well you do.', practise:(a,b) => `Practise āyāt ${a}–${b}`, reviewed: n => `${n} reviewed`,
     hide:'Hide words', firstLetters:'Show first letters', reshuffle:'Hide other words', hideAgain:'Hide again',
-    fadeHelp:'Recite each āyah aloud and fill the gaps from memory. Tap a gap to check it. Tap a word to see its meaning. Raise the level as it gets easier.',
+    fadeHelp:'Recite each āyah aloud and fill the gaps from memory. Tap a gap to check it. Tap a word to see its meaning and grammar. Raise the level as it gets easier.',
     whichNext:(i,n) => `Which word comes next? Word ${i} of ${n}.`, ayahOf:(i,n) => `Āyah ${i} of ${n}`, firstTry:(a,b,p) => `${a}/${b} first try · ${p}%`,
     startOver:'Start over', nextAyah:'Next āyah', results:'See results', slips: n => n ? `${n} slip${n > 1 ? 's' : ''} in this āyah` : 'No slips',
     rangeDone:'Range complete', accuracy:'first-try accuracy', wordsLbl:'words', withSlips:'āyāt with slips',
@@ -286,9 +310,12 @@ const L = {
     dlNoStore:'This browser cannot save audio. Install the app to listen offline.', audioArtifact:'Recitation cannot play inside this page. Open the app:',
     repeatAyah:'Repeat each āyah', repeatRange:'Repeat the whole range', speed:'Speed', gap:'Pause so I can repeat',
     gapHelp:'After each āyah the app stays silent for as long as the āyah lasted, so you can recite it back.',
-    lsAyah:(a, r, R) => R > 1 ? `Āyah ${a} · ${r} of ${R}` : `Āyah ${a}`, lsRound:(k, K) => `round ${k} of ${K}`, listenHelp:'Tap Play or an āyah to start.', listenDone:'Listening finished.',
+    lsAyah:(a, r, R) => R > 1 ? `Āyah ${a} · ${r} of ${R}` : `Āyah ${a}`, lsRound:(k, K) => `round ${k} of ${K}`, listenHelp:'Tap Play to start. Tap a word for its grammar.', listenDone:'Listening finished.',
     noAudioOffline:'No internet, and this āyah’s recitation is not saved. Download the sūrah in the Listen tab.', audioFailed:'The recitation could not be loaded. Try again.',
-    savedAudio:'Saved recitation', savedAudioN: n => `${n} sūrah${n === 1 ? '' : 's'}`, deleteAllAudio:'Delete all saved recitation', audioDeleted:'Saved recitation deleted.'
+    savedAudio:'Saved recitation', savedAudioN: n => `${n} sūrah${n === 1 ? '' : 's'}`, deleteAllAudio:'Delete all saved recitation', audioDeleted:'Saved recitation deleted.',
+    sarf:'Sarf · morphology', nahw:'Nahw · iʿrāb', gType:'Word type', gRoot:'Root', gBab:'Verb form (bāb)', gWazn:'Pattern (wazn)', gPerson:'Person · number · gender', gRole:'Role',
+    gSource:'Grammar from the Quranic Arabic Corpus and the MASAQ iʿrāb dataset. Full analysis:', playFrom:'▶ Play from this āyah', noGrammar:'No grammar data for this word.',
+    srcGrammar:'Grammar: Quranic Arabic Corpus 0.4 (Kais Dukes, corpus.quran.com, GNU GPL) and the MASAQ dataset (Mendeley Data, CC BY 4.0).'
   },
   ru: {
     tabRecall:'Вспомнить', tabFade:'Пропуски', tabNext:'Слово', tabProgress:'Прогресс',
@@ -304,7 +331,7 @@ const L = {
     sessionDone:'Занятие завершено', nothingDue:(a,b) => `В аятах ${a}–${b} нечего повторять`, nextReview: d => `Следующее повторение здесь: ${d}.`,
     anyway:'Можно прочитать весь отрезок сейчас. Расписание обновится по результату.', practise:(a,b) => `Повторить аяты ${a}–${b}`, reviewed: n => `повторено: ${n}`,
     hide:'Скрыть слова', firstLetters:'Показывать первые буквы', reshuffle:'Скрыть другие слова', hideAgain:'Скрыть снова',
-    fadeHelp:'Читайте каждый аят вслух, заполняя пропуски по памяти. Нажмите на пропуск, чтобы проверить. Нажмите на слово, чтобы увидеть значение. Повышайте уровень, когда станет легче.',
+    fadeHelp:'Читайте каждый аят вслух, заполняя пропуски по памяти. Нажмите на пропуск, чтобы проверить. Нажмите на слово, чтобы увидеть значение и грамматику. Повышайте уровень, когда станет легче.',
     whichNext:(i,n) => `Какое слово дальше? Слово ${i} из ${n}.`, ayahOf:(i,n) => `Аят ${i} из ${n}`, firstTry:(a,b,p) => `${a}/${b} с первой попытки · ${p}%`,
     startOver:'Заново', nextAyah:'Следующий аят', results:'Результаты', slips: n => n ? `Ошибок в аяте: ${n}` : 'Без ошибок',
     rangeDone:'Отрезок пройден', accuracy:'с первой попытки', wordsLbl:'слов', withSlips:'аятов с ошибками',
@@ -332,9 +359,12 @@ const L = {
     dlNoStore:'Этот браузер не может сохранять аудио. Установите приложение, чтобы слушать без интернета.', audioArtifact:'Внутри этой страницы чтение не воспроизводится. Откройте приложение:',
     repeatAyah:'Повторять каждый аят', repeatRange:'Повторять весь отрезок', speed:'Скорость', gap:'Пауза, чтобы повторить',
     gapHelp:'После каждого аята приложение молчит столько же, сколько длился аят, чтобы вы повторили его.',
-    lsAyah:(a, r, R) => R > 1 ? `Аят ${a} · ${r} из ${R}` : `Аят ${a}`, lsRound:(k, K) => `круг ${k} из ${K}`, listenHelp:'Нажмите «Слушать» или на аят.', listenDone:'Прослушивание завершено.',
+    lsAyah:(a, r, R) => R > 1 ? `Аят ${a} · ${r} из ${R}` : `Аят ${a}`, lsRound:(k, K) => `круг ${k} из ${K}`, listenHelp:'Нажмите «Слушать». Нажмите на слово, чтобы увидеть грамматику.', listenDone:'Прослушивание завершено.',
     noAudioOffline:'Нет интернета, а чтение этого аята не сохранено. Скачайте суру во вкладке «Слушать».', audioFailed:'Не удалось загрузить чтение. Попробуйте ещё раз.',
-    savedAudio:'Сохранённое чтение', savedAudioN: n => `сур: ${n}`, deleteAllAudio:'Удалить всё сохранённое чтение', audioDeleted:'Сохранённое чтение удалено.'
+    savedAudio:'Сохранённое чтение', savedAudioN: n => `сур: ${n}`, deleteAllAudio:'Удалить всё сохранённое чтение', audioDeleted:'Сохранённое чтение удалено.',
+    sarf:'Сарф · морфология', nahw:'Нахв · иʿраб', gType:'Вид слова', gRoot:'Корень', gBab:'Порода (баб)', gWazn:'Модель (вазн)', gPerson:'Лицо · число · род', gRole:'Роль',
+    gSource:'Грамматика из Quranic Arabic Corpus и набора иʿраба MASAQ. Полный разбор:', playFrom:'▶ Слушать с этого аята', noGrammar:'Для этого слова нет грамматических данных.',
+    srcGrammar:'Грамматика: Quranic Arabic Corpus 0.4 (Кайс Дьюкс, corpus.quran.com, GNU GPL) и набор данных MASAQ (Mendeley Data, CC BY 4.0).'
   },
   kk: {
     tabRecall:'Еске түсіру', tabFade:'Бос орын', tabNext:'Сөз', tabProgress:'Үлгерім',
@@ -350,7 +380,7 @@ const L = {
     sessionDone:'Сабақ аяқталды', nothingDue:(a,b) => `${a}–${b} аяттарда қайталайтын ештеңе жоқ`, nextReview: d => `Мұндағы келесі қайталау: ${d}.`,
     anyway:'Бүкіл аралықты қазір де оқи аласыз. Кесте нәтижеңізге қарай жаңарады.', practise:(a,b) => `${a}–${b} аяттарды қайталау`, reviewed: n => `${n} қайталанды`,
     hide:'Сөздерді жасыру', firstLetters:'Бірінші әріптерді көрсету', reshuffle:'Басқа сөздерді жасыру', hideAgain:'Қайта жасыру',
-    fadeHelp:'Әр аятты дауыстап оқып, бос орындарды жатқа толтырыңыз. Тексеру үшін бос орынды басыңыз. Сөздің мағынасын көру үшін оны басыңыз. Жеңілдеген сайын деңгейді көтеріңіз.',
+    fadeHelp:'Әр аятты дауыстап оқып, бос орындарды жатқа толтырыңыз. Тексеру үшін бос орынды басыңыз. Сөздің мағынасы мен грамматикасын көру үшін оны басыңыз. Жеңілдеген сайын деңгейді көтеріңіз.',
     whichNext:(i,n) => `Келесі сөз қайсы? Сөз: ${i}/${n}.`, ayahOf:(i,n) => `Аят: ${i}/${n}`, firstTry:(a,b,p) => `${a}/${b} бірінші реттен · ${p}%`,
     startOver:'Қайта бастау', nextAyah:'Келесі аят', results:'Нәтижелер', slips: n => n ? `Бұл аятта ${n} қате` : 'Қатесіз',
     rangeDone:'Аралық аяқталды', accuracy:'бірінші реттен', wordsLbl:'сөз', withSlips:'қатесі бар аят',
@@ -378,9 +408,12 @@ const L = {
     dlNoStore:'Бұл браузер аудионы сақтай алмайды. Интернетсіз тыңдау үшін қолданбаны орнатыңыз.', audioArtifact:'Бұл бетте қираат ойнатылмайды. Қолданбаны ашыңыз:',
     repeatAyah:'Әр аятты қайталау', repeatRange:'Бүкіл аралықты қайталау', speed:'Жылдамдық', gap:'Қайталауға үзіліс',
     gapHelp:'Әр аяттан кейін қолданба аят қанша созылса, сонша үнсіз тұрады, сол уақытта оны қайталайсыз.',
-    lsAyah:(a, r, R) => R > 1 ? `${a}-аят · ${r}/${R}` : `${a}-аят`, lsRound:(k, K) => `айналым ${k}/${K}`, listenHelp:'«Тыңдау» түймесін не аятты басыңыз.', listenDone:'Тыңдау аяқталды.',
+    lsAyah:(a, r, R) => R > 1 ? `${a}-аят · ${r}/${R}` : `${a}-аят`, lsRound:(k, K) => `айналым ${k}/${K}`, listenHelp:'«Тыңдау» түймесін басыңыз. Сөздің грамматикасы үшін сөзді басыңыз.', listenDone:'Тыңдау аяқталды.',
     noAudioOffline:'Интернет жоқ, ал бұл аяттың қираты сақталмаған. Сүрені «Тыңдау» бөлімінде жүктеп алыңыз.', audioFailed:'Қираат жүктелмеді. Қайталап көріңіз.',
-    savedAudio:'Сақталған қираат', savedAudioN: n => `${n} сүре`, deleteAllAudio:'Сақталған қираатты түгел жою', audioDeleted:'Сақталған қираат жойылды.'
+    savedAudio:'Сақталған қираат', savedAudioN: n => `${n} сүре`, deleteAllAudio:'Сақталған қираатты түгел жою', audioDeleted:'Сақталған қираат жойылды.',
+    sarf:'Сарф · сөз құрамы', nahw:'Наху · иғраб', gType:'Сөз түрі', gRoot:'Түбір', gBab:'Бап', gWazn:'Өлшем (уәзін)', gPerson:'Жақ · сан · тек', gRole:'Рөлі',
+    gSource:'Грамматика Quranic Arabic Corpus пен MASAQ иғраб деректерінен алынды. Толық талдау:', playFrom:'▶ Осы аяттан тыңдау', noGrammar:'Бұл сөздің грамматикалық деректері жоқ.',
+    srcGrammar:'Грамматика: Quranic Arabic Corpus 0.4 (Кайс Дьюкс, corpus.quran.com, GNU GPL) және MASAQ деректер жиыны (Mendeley Data, CC BY 4.0).'
   }
 };
 const LANGS = [['kk','Қазақша'],['ru','Русский'],['en','English']];
@@ -495,17 +528,19 @@ const surahSub = c => S.lang === 'kk' ? '' : (S.lang === 'ru' ? c.ru : c.en);
 /* ---------- Arabic rendering ---------- */
 const endMark = n => `<span class="end">${arNum(n)}</span>`;  // the KFGQPC font draws Arabic-Indic digits as the āyah-end ornament
 const sep = (v, i) => (v.J && v.J[i]) ? '' : ' ';
+// Each word is its own span so a tap (or hover) can open its grammar card.
+const wordHTML = (v, i) => `<span class="w" data-a="${v.n}" data-i="${i}">${esc(v.w[i])}</span>`;
 function ayahHTML(v, upto){
   const n = upto == null ? v.w.length : upto;
   let s = v.h ? '<span class="hz">۞</span> ' : '';
-  for (let i = 0; i < n; i++) s += esc(v.w[i]) + (i < n - 1 ? sep(v, i) : '');
+  for (let i = 0; i < n; i++) s += wordHTML(v, i) + (i < n - 1 ? sep(v, i) : '');
   return upto == null ? s + ' ' + endMark(v.n) : s;
 }
 // Only the closing words of the previous āyah, so a long cue never pushes the answer off a phone screen.
 function tailHTML(v, k = 8){
   if (v.w.length <= k + 2) return ayahHTML(v);
   let s = '… ';
-  for (let i = v.w.length - k; i < v.w.length; i++) s += esc(v.w[i]) + (i < v.w.length - 1 ? sep(v, i) : '');
+  for (let i = v.w.length - k; i < v.w.length; i++) s += wordHTML(v, i) + (i < v.w.length - 1 ? sep(v, i) : '');
   return s + ' ' + endMark(v.n);
 }
 
@@ -933,11 +968,86 @@ function renderFade(){
   }
   return html + '</section>';
 }
-function wordInfo(a, i){
-  const v = ayah(a);
-  const note = S.lang === 'en' ? '' : ` <small style="opacity:.7">EN</small>`;
-  toast(`<span class="ar" lang="ar">${esc(v.w[i])}</span><span><b>${esc(v.r[i])}</b><br>${esc(v.g[i])}${note}</span>`);
+/* ---------- word card: sarf (morphology) and nahw (iʿrāb) ---------- */
+// Glosses for the Arabic grammar terms: [English, Russian, Kazakh].
+const GLOSS = {
+  noun: ['noun', 'имя существительное', 'зат есім'], propn: ['proper noun', 'имя собственное', 'жалқы есім'],
+  adj: ['adjective', 'прилагательное', 'сын есім'], pron: ['pronoun', 'местоимение', 'есімдік'],
+  dem: ['demonstrative', 'указательное местоимение', 'сілтеу есімдігі'], rel: ['relative pronoun', 'относительное местоимение', 'қатыстық есімдік'],
+  advt: ['adverb of time', 'обстоятельство времени', 'мезгіл пысықтауышы'], advp: ['adverb of place', 'обстоятельство места', 'мекен пысықтауышы'],
+  prep: ['preposition', 'предлог', 'демеулік'], conj: ['conjunction', 'союз', 'жалғаулық'], neg: ['negative particle', 'отрицательная частица', 'болымсыздық шылауы'],
+  part: ['particle', 'частица', 'шылау'], cond: ['conditional', 'условная частица', 'шарт шылауы'], intg: ['interrogative', 'вопросительная частица', 'сұраулық шылау'],
+  voc: ['vocative', 'обращение', 'қаратпа'], inl: ['disjointed letters', 'отдельные буквы', 'жеке әріптер'], num: ['number', 'числительное', 'сан есім'],
+  past: ['past tense verb', 'глагол прошедшего времени', 'өткен шақ етістігі'], past_pass: ['past tense verb, passive', 'глагол прошедшего времени, страдательный', 'өткен шақ етістігі, ырықсыз етіс'],
+  present: ['present tense verb', 'глагол настоящего-будущего времени', 'осы-келер шақ етістігі'], present_pass: ['present tense verb, passive', 'глагол настоящего-будущего времени, страдательный', 'осы-келер шақ етістігі, ырықсыз етіс'],
+  imperative: ['imperative verb', 'повелительный глагол', 'бұйрық етістігі'], imperative_pass: ['imperative verb', 'повелительный глагол', 'бұйрық етістігі'],
+  act_pcpl: ['active participle', 'действительное причастие', 'іс иесінің есімі'], pass_pcpl: ['passive participle', 'страдательное причастие', 'іс объектісінің есімі'],
+  masdar: ['verbal noun (maṣdar)', 'отглагольное имя (масдар)', 'қимыл есімі (масдар)'], intens: ['intensive form', 'форма усиления', 'күшейткіш форма'],
+  qualit: ['adjective-like noun', 'уподобленное прилагательное', 'сипаттауыш есім'], elative: ['elative (comparative)', 'превосходная степень', 'салыстырмалы шырай'],
+  timeplace: ['noun of time or place', 'имя времени или места', 'мезгіл не мекен есімі'], instr: ['noun of instrument', 'имя орудия', 'құрал есімі'],
+  agent: ['subject of the verb', 'подлежащее глагола', 'етістіктің бастауышы'], mubtada: ['subject of a nominal sentence', 'подлежащее именного предложения', 'атаулы сөйлемнің бастауышы'],
+  khabar: ['predicate', 'сказуемое', 'баяндауыш'], naib: ['subject of a passive verb', 'подлежащее страдательного глагола', 'ырықсыз етістіктің бастауышы'],
+  kana_ism: ['subject of kāna', 'подлежащее при «кана»', '«кәна» бастауышы'], kana_khabar: ['predicate of kāna', 'сказуемое при «кана»', '«кәна» баяндауышы'],
+  inna_ism: ['noun of inna', 'имя «инна»', '«инна» есімі'], inna_khabar: ['predicate of inna', 'сказуемое при «инна»', '«инна» баяндауышы'],
+  object: ['direct object', 'прямое дополнение', 'тура толықтауыш'], mutlaq: ['absolute object', 'абсолютное дополнение', 'абсолют толықтауыш'],
+  purpose: ['object of purpose', 'дополнение цели', 'мақсат толықтауышы'], comit: ['object of accompaniment', 'дополнение сопутствия', 'серіктестік толықтауышы'],
+  hal: ['circumstantial (ḥāl)', 'обстоятельство состояния (халь)', 'күй пысықтауыш (хал)'], tamyiz: ['specification (tamyīz)', 'уточнение (тамйиз)', 'нақтылауыш (тамйиз)'],
+  excp: ['excepted noun', 'исключаемое', 'шығарылған есім'], majrur: ['noun after a preposition', 'имя после предлога', 'демеуліктен кейінгі есім'],
+  mudaf_ilayh: ['second term of an iḍāfa', 'второй член изафета', 'изафеттің екінші мүшесі'], naat: ['adjective (naʿt)', 'определение (наат)', 'анықтауыш (нағт)'],
+  matuf: ['joined by a conjunction', 'однородный член (матуф)', 'жалғаулықпен қосылған мүше'], badal: ['apposition (badal)', 'приложение (бадаль)', 'балама (бәдәл)'],
+  tawkid: ['emphasis', 'усиление', 'күшейту'], verb: ['verb', 'глагол', 'етістік']
+};
+const gloss = k => (GLOSS[k] || [])[['en', 'ru', 'kk'].indexOf(S.lang)] || '';
+let GS = null;
+const GQ = {};
+function wordGrammar(s, a, i){
+  try {
+    if (!GS) GS = JSON.parse(document.getElementById('g-s').textContent);
+    if (!GQ[s]) GQ[s] = JSON.parse(document.getElementById('g-' + s).textContent);
+  } catch(e){ return null; }
+  const x = GQ[s][a - 1] && GQ[s][a - 1][i];
+  if (!x) return null;
+  const irab = [];
+  for (let k = 8; k < x.length; k += 2) irab.push([GS[x[k]], GS[x[k + 1]]]);
+  return { type: GS[x[0]], key: GS[x[1]], root: GS[x[2]], cls: GS[x[3]], bab: GS[x[4]], wazn: GS[x[5]], person: GS[x[6]], role: GS[x[7]], irab };
 }
+function wordCardHTML(a, i, inListen){
+  const v = ayah(a), g = wordGrammar(S.surah, a, i);
+  let h = `<p class="wc-word" lang="ar">${esc(v.w[i])}</p>
+    <p class="wc-gloss"><b>${esc(v.r[i])}</b> · ${esc(v.g[i])}${S.lang === 'en' ? '' : ' <small>EN</small>'}</p>`;
+  if (!g) return h + `<p class="meta">${T('noGrammar')}</p>`;
+  const row = (label, term, value, note) => value ? `<div class="wc-row"><dt>${label} <span lang="ar">${term}</span></dt>
+    <dd><span class="wc-ar" lang="ar">${esc(value)}</span>${note ? `<small>${esc(note)}</small>` : ''}</dd></div>` : '';
+  h += `<section class="wc-sec"><h3>${T('sarf')}</h3><dl>${row(T('gType'), 'النوع', g.type, gloss(g.key))}
+    ${row(T('gRoot'), 'الجذر', g.root && g.root + (g.cls ? ' · ' + g.cls : ''), '')}${row(T('gBab'), 'الباب', g.bab, '')}
+    ${row(T('gWazn'), 'الوزن', g.wazn, '')}${row(T('gPerson'), 'الصيغة', g.person, '')}</dl></section>`;
+  if (g.irab.length) h += `<section class="wc-sec"><h3>${T('nahw')}</h3>${gloss(g.role) && g.role !== 'verb' ? `<p class="meta" style="margin:0">${T('gRole')}: ${esc(gloss(g.role))}</p>` : ''}
+    <ol class="irab" lang="ar" dir="rtl">${g.irab.map(([seg, text]) => `<li>${seg ? `<b>${esc(seg)}:</b> ` : ''}${esc(text)}</li>`).join('')}</ol></section>`;
+  h += `<p class="meta wc-src">${T('gSource')} <a href="https://corpus.quran.com/wordmorphology.jsp?location=(${S.surah}:${a}:${i + 1})" target="_blank" rel="noopener">corpus.quran.com ↗</a></p>`;
+  if (inListen) h += `<button class="btn primary block" id="wcPlay" data-a="${a}" type="button">${T('playFrom')}</button>`;
+  return h;
+}
+function openWord(a, i, inListen){
+  hidePop();
+  $('#wordTitle').textContent = `${S.surah}:${a} · ${i + 1}`;
+  $('#wordBody').innerHTML = wordCardHTML(a, i, inListen);
+  openSheet('#wordSheet');
+}
+// On a computer, resting the pointer on a word shows the same card in a small pop-up.
+const CAN_HOVER = matchMedia('(hover: hover) and (pointer: fine)').matches;
+let popTimer = 0, popFor = null;
+const wordTarget = el => { const w = el && el.closest && el.closest('.w[data-a], .lsa [data-wi]'); return w && !w.classList.contains('gap') ? w : null; };
+const wordRef = w => w.dataset.a ? [+w.dataset.a, +w.dataset.i] : [+w.closest('.lsa').dataset.la, +w.dataset.wi];
+function showPop(w){
+  if (!w.isConnected) return;
+  const [a, i] = wordRef(w), p = $('#wordPop');
+  p.innerHTML = wordCardHTML(a, i, false); p.hidden = false;
+  const r = w.getBoundingClientRect(), ph = p.offsetHeight, pw = p.offsetWidth;
+  let top = r.bottom + 8; if (top + ph > innerHeight - 8) top = Math.max(8, r.top - ph - 8);
+  p.style.top = top + 'px'; p.style.left = Math.min(Math.max(8, r.left + r.width / 2 - pw / 2), innerWidth - pw - 8) + 'px';
+  popFor = w;
+}
+function hidePop(){ clearTimeout(popTimer); const p = document.getElementById('wordPop'); if (p) p.hidden = true; popFor = null; }
 
 /* ---------- Next word ---------- */
 const norm = w => w.replace(MARKS_G, '').replace(/[ٱأإآ]/g, 'ا').replace(/ى/g, 'ي').replace(/[۩۞]/g, '').trim();
@@ -1016,7 +1126,7 @@ function renderProgress(){
       ${due.length ? `<ul class="list">${due.map(([sid, n]) => { const x = chapters[sid - 1]; return `<li><button type="button" data-due="${sid}"><span class="n">${sid}</span><span class="t">${esc(x.n)}<small>${esc(surahSub(x))}</small></span><span class="due">${n}</span></button></li>`; }).join('')}</ul>`
                    : `<p class="meta" style="margin:0">${T('nothingDueAll')}</p>`}
       <p class="meta" style="margin:0">${T(storeMsg)}</p></section>
-    <footer><p><b>${T('sources')}.</b> ${T('srcText')}</p><p>${T('srcTr')}</p>${IN_CLAUDE || PWA ? '' : `<p>${T('install')}</p>`}</footer>`;
+    <footer><p><b>${T('sources')}.</b> ${T('srcText')}</p><p>${T('srcTr')}</p><p>${T('srcGrammar')}</p>${IN_CLAUDE || PWA ? '' : `<p>${T('install')}</p>`}</footer>`;
 }
 
 /* ---------- settings sheet ---------- */
@@ -1053,7 +1163,7 @@ function renderPicker(){
   $('#from').max = $('#to').max = ch().c; $('#from').value = S.from; $('#to').value = S.to;
 }
 function openSheet(id){ $(id).hidden = false; document.body.style.overflow = 'hidden'; }
-function closeSheets(){ $('#picker').hidden = true; $('#settings').hidden = true; document.body.style.overflow = ''; confirmReset = false; }
+function closeSheets(){ $('#picker').hidden = true; $('#settings').hidden = true; $('#wordSheet').hidden = true; document.body.style.overflow = ''; confirmReset = false; }
 
 /* ---------- top-level render ---------- */
 function applyLook(){
@@ -1172,6 +1282,7 @@ main.addEventListener('click', e => {
     LP.el.defaultPlaybackRate = LP.el.playbackRate = S.speed;
     return render();
   }
+  const lw = t.closest('.lsa [data-wi]'); if (lw) return openWord(+lw.closest('.lsa').dataset.la, +lw.dataset.wi, true);
   const la = t.closest('.lsa'); if (la) return lpStart(rangeList().indexOf(+la.dataset.la));
   if (t.closest('#dlStart')) return downloadSurah(S.surah);
   if (t.closest('#dlStop')) { if (DL) { DL.stop = true; DL.user = true; } return; }
@@ -1187,7 +1298,7 @@ main.addEventListener('click', e => {
   if (t.closest('#hideAgain')) { fadeShown.clear(); return render(); }
   const gap = t.closest('.w.gap'); if (gap) return revealGap(gap);
   if (t.closest('#closeWarn')) { storeWarnClosed = true; return render(); }
-  const w = t.closest('.w[data-a]'); if (w) return wordInfo(+w.dataset.a, +w.dataset.i);
+  const w = t.closest('.w[data-a]'); if (w) return openWord(+w.dataset.a, +w.dataset.i);
   const o = t.closest('[data-opt]'); if (o) return choose(+o.dataset.opt);
   if (t.closest('#nextAyah')) return nextAyah();
   if (t.closest('#restartQuiz') || t.closest('#restartQuiz2')) { startQuiz(); return render(true); }
@@ -1202,6 +1313,14 @@ main.addEventListener('click', e => {
     S.mode = 'recall'; selectSurah(sid, list[0], list[list.length - 1]);
   }
 });
+if (CAN_HOVER) {
+  main.addEventListener('mouseover', e => { const w = wordTarget(e.target); if (!w || w === popFor) return; clearTimeout(popTimer); popTimer = setTimeout(() => showPop(w), 350); });
+  main.addEventListener('mouseout', e => { if (wordTarget(e.target) && !wordTarget(e.relatedTarget)) { clearTimeout(popTimer); popTimer = setTimeout(hidePop, 250); } });
+  $('#wordPop').addEventListener('mouseenter', () => clearTimeout(popTimer));
+  $('#wordPop').addEventListener('mouseleave', () => { popTimer = setTimeout(hidePop, 250); });
+  addEventListener('scroll', hidePop, { passive: true });
+}
+$('#wordBody').addEventListener('click', e => { const b = e.target.closest('#wcPlay'); if (b) { closeSheets(); lpStart(rangeList().indexOf(+b.dataset.a)); } });
 main.addEventListener('keydown', e => {
   if ((e.key === 'Enter' || e.key === ' ') && e.target.classList.contains('gap')) { e.preventDefault(); revealGap(e.target); }
   if (e.key === 'Enter' && e.target.classList.contains('lsa')) { e.preventDefault(); lpStart(rangeList().indexOf(+e.target.dataset.la)); }

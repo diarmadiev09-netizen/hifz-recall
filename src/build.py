@@ -36,6 +36,10 @@ def data_tags():
         for v in verses:
             v.pop("a", None)  # the audio path is derived from the sūrah and āyah numbers
         parts.append(tag(f"q-{sid}", verses))
+    g = json.loads(read("grammar.json"))  # per-word sarf and iʿrāb, built by build_grammar.py
+    parts.append(tag("g-s", g["s"]))
+    for sid, verses in g["q"].items():
+        parts.append(tag(f"g-{sid}", verses))
     return "\n".join(parts)
 
 

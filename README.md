@@ -18,6 +18,7 @@ After the first visit the app works fully offline. Recitation plays offline for 
 - **Recall:** see the end of the previous āyah, recite the next one from memory, reveal it and grade yourself. Your grade schedules the next review.
 - **Fade:** the chosen range with a share of its words hidden (25–100%), optionally showing first letters. Tap a gap to check it.
 - **Next word:** build each āyah by picking the next word from four options. Āyāt with slips can be sent to Recall.
+- **Word grammar:** tap any word (or rest the pointer on it on a computer) to see its sarf (word type, root and its class, bāb, wazn, person) and its nahw (iʿrāb of each part of the word).
 - **Progress:** memory map of the sūrah and the āyāt due for review today.
 
 Progress stays on the device. Use Settings → Backup to move it to a new phone.
@@ -28,6 +29,7 @@ Progress stays on the device. Use Settings → Backup to move it to a new phone.
 - Translations: Saheeh International (English), Elmir Kuliev (Russian), Khalifa Altay (Kazakh), via Quran.com.
 - Word-by-word meanings: Quran.com (English).
 - Recitation: Mishary Rashid Alafasy, streamed from Quran.com.
+- Word grammar: the Quranic Arabic Corpus 0.4 (root, lemma, verb form, aspect, voice, person) and the MASAQ dataset (iʿrāb role, case and case marker). See the notices below.
 
 ## Rebuilding
 
@@ -37,5 +39,21 @@ python src/build_data.py raw src/quran.json    # clean and check the data
 python src/build.py                            # writes docs/ (web app) and dist/ (single offline file)
 ```
 
+The word grammar is rebuilt from two files placed in `grammar/`: `quranic-corpus-morphology-0.4.txt`
+(from https://corpus.quran.com/download/) and `MASAQ.csv` (from https://data.mendeley.com/datasets/9yvrzxktmr/5).
+Then run `python src/build_grammar.py` before `python src/build.py`.
+
 `docs/` is what GitHub Pages serves. To redraw the icons, run `python src/save_icons.py`,
 open http://127.0.0.1:8770/icons.html and call `saveAll()` in the page.
+
+## Grammar data notices
+
+**Quranic Arabic Corpus.** The sarf data is derived from the Quranic Arabic Corpus (morphology, version 0.4),
+Copyright (C) 2011 Kais Dukes, licensed under the GNU General Public License. The annotation can be used in any
+website or application provided its source is clearly indicated and linked: https://corpus.quran.com.
+The corpus builds on the verified Arabic text of the Tanzil project (https://tanzil.net).
+
+**MASAQ.** The nahw (iʿrāb) data is derived from MASAQ, the Morphologically-Analyzed and Syntactically-Annotated
+Quran Dataset (Mendeley Data, version 5, doi:10.17632/9yvrzxktmr.5), licensed under CC BY 4.0
+(https://creativecommons.org/licenses/by/4.0/). Changes: the per-segment tags were turned into Arabic iʿrāb
+sentences and aligned to Quran.com's word numbering.
