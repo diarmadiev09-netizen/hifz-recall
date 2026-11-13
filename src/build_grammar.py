@@ -5,15 +5,21 @@ Inputs (in grammar/, not committed; see README for where to download them):
   MASAQ.csv                           MASAQ dataset (CC BY 4.0, doi:10.17632/9yvrzxktmr.5): iʿrāb role, case, case marker
 Output: src/grammar.json = {"s": [strings…], "q": {sūrah: [[word, …] per āyah]}}
 Each word is a flat list of indices into "s":
-  [type, typeKey, root, rootClass, bab, wazn, person, roleKey, segment, iʿrāb, segment, iʿrāb, …]
+  [type, typeKey, root, rootClass, bab, wazn, person, roleKey, lemma, meaningRu, meaningKk, segment, iʿrāb, segment, iʿrāb, …]
+The two meanings come from lemma_meanings.txt (automatic translation of the commonest dictionary entries).
 """
 import csv, json, os, re, sys
 from difflib import SequenceMatcher
 
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import lemmas  # dictionary entries and their ranks
+
 SRC = os.path.dirname(os.path.abspath(__file__))
 G = os.path.join(os.path.dirname(SRC), "grammar")
 
-BW = dict(zip("'|><&}AbptvjHxd*rzs$SDTZEg_fqklmnhwYyFNKaui~o^#`{", "ءآأإؤئابةتثجحخدذرزسشصضطظعغـفقكلمنهوىيًٌٍَُِّْٰٓٔٱ"))
+BW = dict(zip("'|><&}AbptvjHxd*rzs$SDTZEg_fqklmnhwYyFNKaui~o^#`{",
+              "ءآأإؤئابةتثجحخدذرزسشصضطظعغـ"
+              "فقكلمنهوىيًٌٍَُِّْٰٓٔٱ"))  # Buckwalter -> Arabic
 def ar(bw): return "".join(BW.get(c, "") for c in bw)
 
 HARAKAT = "ًٌٍَُِّْ"
@@ -283,7 +289,14 @@ def main():
     for r in csv.DictReader(open(os.path.join(G, "MASAQ.csv"), encoding="utf8")):
         masaq.setdefault((int(r["Sura_No"]), int(r["Verse_No"])), {}).setdefault(int(r["Word_No"]), []).append(r)
     quran = json.load(open(os.path.join(SRC, "quran.json"), encoding="utf8"))["surahs"]
-    out, stats = {}, {"words": 0, "with_irab": 0, "with_wazn": 0, "realigned_verses": 0}
+    word_key, ranked = lemmas.load()
+    entry = {key: (arabic if not key.startswith("FORM:") else "", rank) for rank, (key, arabic, _, _) in enumerate(ranked, 1)}
+    meaning = {}
+    for line in open(os.path.join(SRC, "lemma_meanings.txt"), encoding="utf8"):
+        if line.startswith("#") or not line.strip(): continue
+        rank, ru, kk = line.strip().split("|")
+        meaning[int(rank)] = (ru.strip(), kk.strip())
+    out, stats = {}, {"words": 0, "with_irab": 0, "with_wazn": 0, "with_meaning": 0, "realigned_verses": 0}
     for sid, verses in quran.items():
         out[sid] = []
         for v in verses:
@@ -305,8 +318,10 @@ def main():
                         label, text, key = got
                         lines += [S(label), S(text)]
                         if r["Morph_Type"] == "Stem" and not role_key: role_key = key
-                stats["words"] += 1; stats["with_irab"] += bool(lines); stats["with_wazn"] += bool(strings[fields[5]])
-                row.append(fields + [S(role_key)] + lines)
+                lemma_ar, rank = entry[word_key[(int(sid), v["n"], i + 1)]]
+                ru, kk = meaning.get(rank, ("", ""))
+                stats["words"] += 1; stats["with_irab"] += bool(lines); stats["with_wazn"] += bool(strings[fields[5]]); stats["with_meaning"] += bool(ru)
+                row.append(fields + [S(role_key), S(lemma_ar), S(ru), S(kk)] + lines)
             out[sid].append(row)
     json.dump({"s": strings, "q": out}, open(os.path.join(SRC, "grammar.json"), "w", encoding="utf8"), ensure_ascii=False, separators=(",", ":"))
     print(stats, "strings:", len(strings), "bytes:", os.path.getsize(os.path.join(SRC, "grammar.json")))

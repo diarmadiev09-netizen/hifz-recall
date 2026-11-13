@@ -171,6 +171,9 @@ kbd{font-family:var(--font-ui);font-size:11px;border:1px solid currentColor;bord
 .wc{--font-ar-ui:"Noto Naskh Arabic","Geeza Pro","Segoe UI","Tahoma",sans-serif}
 .wc-word{font-family:var(--font-ar);font-size:calc(var(--ar-size) * 1.25);line-height:1.6;text-align:center;margin:0;direction:rtl}
 .wc-gloss{margin:0;text-align:center;color:var(--muted);font-size:14px}
+.wc-mean{margin:0;text-align:center;font-size:19px;font-weight:600}
+.wc-mean small{display:block;font-weight:400;color:var(--muted);font-size:11px}
+.ws-mean{color:var(--ink);font-size:16px}
 .wc-gloss small,.wc dd small{display:block;color:var(--muted);font-size:12px}
 .wc-sec{display:flex;flex-direction:column;gap:8px;border-top:1px solid var(--line);padding-top:12px}
 .wc-sec h3{margin:0;font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--gold)}
@@ -183,7 +186,15 @@ kbd{font-family:var(--font-ui);font-size:11px;border:1px solid currentColor;bord
 .irab{margin:0;padding-right:18px;font-family:var(--font-ar-ui);font-size:17px;line-height:1.8}
 .irab b{color:var(--accent)}
 .wc-src{margin:0;font-size:12px}
-.wpop{position:fixed;z-index:45;width:min(380px,calc(100vw - 24px));max-height:70vh;overflow:auto;background:var(--sheet);border:1px solid var(--line);border-radius:14px;box-shadow:0 10px 30px rgba(0,0,0,.18);padding:12px 14px;display:flex;flex-direction:column;gap:10px}
+.wpop{position:fixed;z-index:45;pointer-events:none;overflow:hidden;background:var(--sheet);border:1px solid var(--line);border-radius:14px;box-shadow:0 10px 30px rgba(0,0,0,.18);padding:12px 14px;display:flex;flex-direction:column;gap:10px}
+.wpop.strip{gap:4px;padding:8px 14px;border-color:var(--gold)}
+.wpop.strip p{margin:0}
+.ws-head{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;font-size:14px;color:var(--muted)}
+.ws-word{font-family:var(--font-ar);font-size:26px;line-height:1.5;color:var(--ink)}
+.ws-sarf{display:flex;align-items:baseline;justify-content:space-between;gap:12px;flex-wrap:wrap;font-family:var(--font-ar-ui);font-size:15px}
+.ws-sarf small{font-family:var(--font-ui);color:var(--muted);font-size:12px}
+.ws-irab{font-family:var(--font-ar-ui);font-size:15px;line-height:1.7;text-align:right}
+.ws-irab b{color:var(--accent)}
 footer{font-size:13px;color:var(--muted)}
 footer p{margin:0 0 6px}
 </style>
@@ -313,9 +324,9 @@ const L = {
     lsAyah:(a, r, R) => R > 1 ? `Āyah ${a} · ${r} of ${R}` : `Āyah ${a}`, lsRound:(k, K) => `round ${k} of ${K}`, listenHelp:'Tap Play to start. Tap a word for its grammar.', listenDone:'Listening finished.',
     noAudioOffline:'No internet, and this āyah’s recitation is not saved. Download the sūrah in the Listen tab.', audioFailed:'The recitation could not be loaded. Try again.',
     savedAudio:'Saved recitation', savedAudioN: n => `${n} sūrah${n === 1 ? '' : 's'}`, deleteAllAudio:'Delete all saved recitation', audioDeleted:'Saved recitation deleted.',
-    sarf:'Sarf · morphology', nahw:'Nahw · iʿrāb', gType:'Word type', gRoot:'Root', gBab:'Verb form (bāb)', gWazn:'Pattern (wazn)', gPerson:'Person · number · gender', gRole:'Role',
+    sarf:'Sarf · morphology', nahw:'Nahw · iʿrāb', gType:'Word type', gRoot:'Root', gBab:'Verb form (bāb)', gWazn:'Pattern (wazn)', gPerson:'Person · number · gender', gRole:'Role', gLemma:'Dictionary form', autoMeaning:'',
     gSource:'Grammar from the Quranic Arabic Corpus and the MASAQ iʿrāb dataset. Full analysis:', playFrom:'▶ Play from this āyah', noGrammar:'No grammar data for this word.',
-    srcGrammar:'Grammar: Quranic Arabic Corpus 0.4 (Kais Dukes, corpus.quran.com, GNU GPL) and the MASAQ dataset (Mendeley Data, CC BY 4.0).'
+    srcGrammar:'Grammar: Quranic Arabic Corpus 0.4 (Kais Dukes, corpus.quran.com, GNU GPL) and the MASAQ dataset (Mendeley Data, CC BY 4.0). Russian and Kazakh word meanings are an automatic (AI) translation and may contain mistakes.'
   },
   ru: {
     tabRecall:'Вспомнить', tabFade:'Пропуски', tabNext:'Слово', tabProgress:'Прогресс',
@@ -362,9 +373,9 @@ const L = {
     lsAyah:(a, r, R) => R > 1 ? `Аят ${a} · ${r} из ${R}` : `Аят ${a}`, lsRound:(k, K) => `круг ${k} из ${K}`, listenHelp:'Нажмите «Слушать». Нажмите на слово, чтобы увидеть грамматику.', listenDone:'Прослушивание завершено.',
     noAudioOffline:'Нет интернета, а чтение этого аята не сохранено. Скачайте суру во вкладке «Слушать».', audioFailed:'Не удалось загрузить чтение. Попробуйте ещё раз.',
     savedAudio:'Сохранённое чтение', savedAudioN: n => `сур: ${n}`, deleteAllAudio:'Удалить всё сохранённое чтение', audioDeleted:'Сохранённое чтение удалено.',
-    sarf:'Сарф · морфология', nahw:'Нахв · иʿраб', gType:'Вид слова', gRoot:'Корень', gBab:'Порода (баб)', gWazn:'Модель (вазн)', gPerson:'Лицо · число · род', gRole:'Роль',
+    sarf:'Сарф · морфология', nahw:'Нахв · иʿраб', gType:'Вид слова', gRoot:'Корень', gBab:'Порода (баб)', gWazn:'Модель (вазн)', gPerson:'Лицо · число · род', gRole:'Роль', gLemma:'Словарная форма', autoMeaning:'словарное значение · автоперевод',
     gSource:'Грамматика из Quranic Arabic Corpus и набора иʿраба MASAQ. Полный разбор:', playFrom:'▶ Слушать с этого аята', noGrammar:'Для этого слова нет грамматических данных.',
-    srcGrammar:'Грамматика: Quranic Arabic Corpus 0.4 (Кайс Дьюкс, corpus.quran.com, GNU GPL) и набор данных MASAQ (Mendeley Data, CC BY 4.0).'
+    srcGrammar:'Грамматика: Quranic Arabic Corpus 0.4 (Кайс Дьюкс, corpus.quran.com, GNU GPL) и набор данных MASAQ (Mendeley Data, CC BY 4.0). Значения слов на русском и казахском переведены автоматически (ИИ) и могут содержать ошибки.'
   },
   kk: {
     tabRecall:'Еске түсіру', tabFade:'Бос орын', tabNext:'Сөз', tabProgress:'Үлгерім',
@@ -411,9 +422,9 @@ const L = {
     lsAyah:(a, r, R) => R > 1 ? `${a}-аят · ${r}/${R}` : `${a}-аят`, lsRound:(k, K) => `айналым ${k}/${K}`, listenHelp:'«Тыңдау» түймесін басыңыз. Сөздің грамматикасы үшін сөзді басыңыз.', listenDone:'Тыңдау аяқталды.',
     noAudioOffline:'Интернет жоқ, ал бұл аяттың қираты сақталмаған. Сүрені «Тыңдау» бөлімінде жүктеп алыңыз.', audioFailed:'Қираат жүктелмеді. Қайталап көріңіз.',
     savedAudio:'Сақталған қираат', savedAudioN: n => `${n} сүре`, deleteAllAudio:'Сақталған қираатты түгел жою', audioDeleted:'Сақталған қираат жойылды.',
-    sarf:'Сарф · сөз құрамы', nahw:'Наху · иғраб', gType:'Сөз түрі', gRoot:'Түбір', gBab:'Бап', gWazn:'Өлшем (уәзін)', gPerson:'Жақ · сан · тек', gRole:'Рөлі',
+    sarf:'Сарф · сөз құрамы', nahw:'Наху · иғраб', gType:'Сөз түрі', gRoot:'Түбір', gBab:'Бап', gWazn:'Өлшем (уәзін)', gPerson:'Жақ · сан · тек', gRole:'Рөлі', gLemma:'Сөздік түрі', autoMeaning:'сөздік мағынасы · автоматты аударма',
     gSource:'Грамматика Quranic Arabic Corpus пен MASAQ иғраб деректерінен алынды. Толық талдау:', playFrom:'▶ Осы аяттан тыңдау', noGrammar:'Бұл сөздің грамматикалық деректері жоқ.',
-    srcGrammar:'Грамматика: Quranic Arabic Corpus 0.4 (Кайс Дьюкс, corpus.quran.com, GNU GPL) және MASAQ деректер жиыны (Mendeley Data, CC BY 4.0).'
+    srcGrammar:'Грамматика: Quranic Arabic Corpus 0.4 (Кайс Дьюкс, corpus.quran.com, GNU GPL) және MASAQ деректер жиыны (Mendeley Data, CC BY 4.0). Сөздердің орысша және қазақша мағыналары автоматты түрде (ЖИ) аударылған, қателер болуы мүмкін.'
   }
 };
 const LANGS = [['kk','Қазақша'],['ru','Русский'],['en','English']];
@@ -1008,18 +1019,20 @@ function wordGrammar(s, a, i){
   const x = GQ[s][a - 1] && GQ[s][a - 1][i];
   if (!x) return null;
   const irab = [];
-  for (let k = 8; k < x.length; k += 2) irab.push([GS[x[k]], GS[x[k + 1]]]);
-  return { type: GS[x[0]], key: GS[x[1]], root: GS[x[2]], cls: GS[x[3]], bab: GS[x[4]], wazn: GS[x[5]], person: GS[x[6]], role: GS[x[7]], irab };
+  for (let k = 11; k < x.length; k += 2) irab.push([GS[x[k]], GS[x[k + 1]]]);
+  return { type: GS[x[0]], key: GS[x[1]], root: GS[x[2]], cls: GS[x[3]], bab: GS[x[4]], wazn: GS[x[5]], person: GS[x[6]], role: GS[x[7]],
+           lemma: GS[x[8]], mean: S.lang === 'ru' ? GS[x[9]] : S.lang === 'kk' ? GS[x[10]] : '', irab };
 }
 function wordCardHTML(a, i, inListen){
   const v = ayah(a), g = wordGrammar(S.surah, a, i);
   let h = `<p class="wc-word" lang="ar">${esc(v.w[i])}</p>
+    ${g && g.mean ? `<p class="wc-mean">${esc(g.mean)}<small>${T('autoMeaning')}</small></p>` : ''}
     <p class="wc-gloss"><b>${esc(v.r[i])}</b> · ${esc(v.g[i])}${S.lang === 'en' ? '' : ' <small>EN</small>'}</p>`;
   if (!g) return h + `<p class="meta">${T('noGrammar')}</p>`;
   const row = (label, term, value, note) => value ? `<div class="wc-row"><dt>${label} <span lang="ar">${term}</span></dt>
     <dd><span class="wc-ar" lang="ar">${esc(value)}</span>${note ? `<small>${esc(note)}</small>` : ''}</dd></div>` : '';
   h += `<section class="wc-sec"><h3>${T('sarf')}</h3><dl>${row(T('gType'), 'النوع', g.type, gloss(g.key))}
-    ${row(T('gRoot'), 'الجذر', g.root && g.root + (g.cls ? ' · ' + g.cls : ''), '')}${row(T('gBab'), 'الباب', g.bab, '')}
+    ${row(T('gLemma'), 'الأصل', g.lemma, '')}${row(T('gRoot'), 'الجذر', g.root && g.root + (g.cls ? ' · ' + g.cls : ''), '')}${row(T('gBab'), 'الباب', g.bab, '')}
     ${row(T('gWazn'), 'الوزن', g.wazn, '')}${row(T('gPerson'), 'الصيغة', g.person, '')}</dl></section>`;
   if (g.irab.length) h += `<section class="wc-sec"><h3>${T('nahw')}</h3>${gloss(g.role) && g.role !== 'verb' ? `<p class="meta" style="margin:0">${T('gRole')}: ${esc(gloss(g.role))}</p>` : ''}
     <ol class="irab" lang="ar" dir="rtl">${g.irab.map(([seg, text]) => `<li>${seg ? `<b>${esc(seg)}:</b> ` : ''}${esc(text)}</li>`).join('')}</ol></section>`;
@@ -1033,21 +1046,52 @@ function openWord(a, i, inListen){
   $('#wordBody').innerHTML = wordCardHTML(a, i, inListen);
   openSheet('#wordSheet');
 }
-// On a computer, resting the pointer on a word shows the same card in a small pop-up.
+// The same facts in a few dense lines, for the hover strip on screens with no free margin.
+function wordStripHTML(a, i){
+  const v = ayah(a), g = wordGrammar(S.surah, a, i);
+  let h = `<p class="ws-head"><span class="ws-word" lang="ar">${esc(v.w[i])}</span>${g && g.mean ? `<b class="ws-mean">${esc(g.mean)}</b>` : ''}<span><b>${esc(v.r[i])}</b> · ${esc(v.g[i])}${S.lang === 'en' ? '' : ' <small>EN</small>'}</span></p>`;
+  if (!g) return h;
+  const sarf = [g.type, g.root && g.root + (g.cls ? ' · ' + g.cls : ''), g.wazn || g.bab, g.person].filter(Boolean);
+  h += `<p class="ws-sarf"><span lang="ar" dir="rtl">${sarf.map(esc).join(' ◦ ')}</span>${gloss(g.key) ? `<small>${esc(gloss(g.key))}</small>` : ''}</p>`;
+  if (g.irab.length) h += `<p class="ws-irab" lang="ar" dir="rtl">${g.irab.map(([seg, text]) => `${seg ? `<b>${esc(seg)}:</b> ` : ''}${esc(text)}`).join(' ؛ ')}</p>`;
+  return h;
+}
+// On a computer, resting the pointer on a word shows its card without covering the text being read:
+// in the empty margin beside the column when there is room, otherwise as a strip in the other half of the screen.
 const CAN_HOVER = matchMedia('(hover: hover) and (pointer: fine)').matches;
 let popTimer = 0, popFor = null;
 const wordTarget = el => { const w = el && el.closest && el.closest('.w[data-a], .lsa [data-wi]'); return w && !w.classList.contains('gap') ? w : null; };
 const wordRef = w => w.dataset.a ? [+w.dataset.a, +w.dataset.i] : [+w.closest('.lsa').dataset.la, +w.dataset.wi];
 function showPop(w){
   if (!w.isConnected) return;
-  const [a, i] = wordRef(w), p = $('#wordPop');
-  p.innerHTML = wordCardHTML(a, i, false); p.hidden = false;
-  const r = w.getBoundingClientRect(), ph = p.offsetHeight, pw = p.offsetWidth;
-  let top = r.bottom + 8; if (top + ph > innerHeight - 8) top = Math.max(8, r.top - ph - 8);
-  p.style.top = top + 'px'; p.style.left = Math.min(Math.max(8, r.left + r.width / 2 - pw / 2), innerWidth - pw - 8) + 'px';
+  hidePop();
+  const [a, i] = wordRef(w), p = $('#wordPop'), r = w.getBoundingClientRect();
+  const col = main.getBoundingClientRect(), margin = innerWidth - col.right;
+  const top0 = document.querySelector('.topbar').getBoundingClientRect().bottom + 8, bottom0 = document.querySelector('.nav').getBoundingClientRect().top - 8;
+  const side = margin >= 300;
+  p.className = 'wpop wc ' + (side ? 'side' : 'strip');
+  p.innerHTML = side ? wordCardHTML(a, i, false) : wordStripHTML(a, i);
+  p.hidden = false;
+  if (side) {
+    p.style.width = Math.min(380, margin - 24) + 'px';
+    p.style.left = col.right + 12 + 'px';
+    p.style.maxHeight = bottom0 - top0 + 'px';
+    p.style.top = Math.max(top0, Math.min(r.top - 16, bottom0 - p.offsetHeight)) + 'px';
+  } else {
+    p.style.width = Math.min(col.width - 16, innerWidth - 24) + 'px';
+    p.style.left = col.left + (col.width - p.offsetWidth) / 2 + 'px';
+    p.style.maxHeight = '';
+    p.style.top = (r.top + r.height / 2 > (top0 + bottom0) / 2 ? top0 : bottom0 - p.offsetHeight) + 'px';
+  }
+  w.classList.add('sel');
   popFor = w;
 }
-function hidePop(){ clearTimeout(popTimer); const p = document.getElementById('wordPop'); if (p) p.hidden = true; popFor = null; }
+function hidePop(){
+  clearTimeout(popTimer);
+  const p = document.getElementById('wordPop'); if (p) p.hidden = true;
+  if (popFor) popFor.classList.remove('sel');
+  popFor = null;
+}
 
 /* ---------- Next word ---------- */
 const norm = w => w.replace(MARKS_G, '').replace(/[ٱأإآ]/g, 'ا').replace(/ى/g, 'ي').replace(/[۩۞]/g, '').trim();
@@ -1316,9 +1360,8 @@ main.addEventListener('click', e => {
 if (CAN_HOVER) {
   main.addEventListener('mouseover', e => { const w = wordTarget(e.target); if (!w || w === popFor) return; clearTimeout(popTimer); popTimer = setTimeout(() => showPop(w), 350); });
   main.addEventListener('mouseout', e => { if (wordTarget(e.target) && !wordTarget(e.relatedTarget)) { clearTimeout(popTimer); popTimer = setTimeout(hidePop, 250); } });
-  $('#wordPop').addEventListener('mouseenter', () => clearTimeout(popTimer));
-  $('#wordPop').addEventListener('mouseleave', () => { popTimer = setTimeout(hidePop, 250); });
   addEventListener('scroll', hidePop, { passive: true });
+  addEventListener('resize', hidePop);
 }
 $('#wordBody').addEventListener('click', e => { const b = e.target.closest('#wcPlay'); if (b) { closeSheets(); lpStart(rangeList().indexOf(+b.dataset.a)); } });
 main.addEventListener('keydown', e => {
