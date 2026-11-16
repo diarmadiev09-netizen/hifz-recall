@@ -43,5 +43,5 @@ if __name__ == "__main__":
                 glosses[word_key[(int(sid), v["n"], i + 1)]][g.strip().lower()] += 1
     for rank in range(lo, hi + 1):
         key, arabic, tag, n = ranked[rank - 1]
-        top = "; ".join(g[:30] for g, _ in glosses[key].most_common(3))
+        top = "; ".join(g[:26] for g, _ in glosses[key].most_common(2))
         print(f"{rank}|{arabic}|{tag}|{top}")

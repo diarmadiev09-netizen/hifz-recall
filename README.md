@@ -29,7 +29,7 @@ Progress stays on the device. Use Settings → Backup to move it to a new phone.
 - Translations: Saheeh International (English), Elmir Kuliev (Russian), Khalifa Altay (Kazakh), via Quran.com.
 - Word-by-word meanings: Quran.com (English).
 - Recitation: Mishary Rashid Alafasy, streamed from Quran.com.
-- Word meanings in Russian and Kazakh: an automatic (AI) translation of the 1,000 most frequent dictionary entries, which cover 89% of all words (`src/lemma_meanings.txt`). They may contain mistakes; the other words show the English meaning only.
+- Word meanings in Russian and Kazakh: an automatic (AI) translation of all 4,889 dictionary entries of the Quran, covering every word (`src/lemma_meanings.txt`). It may contain mistakes.
 - Word grammar: the Quranic Arabic Corpus 0.4 (root, lemma, verb form, aspect, voice, person) and the MASAQ dataset (iʿrāb role, case and case marker). See the notices below.
 
 ## Rebuilding
@@ -43,7 +43,7 @@ python src/build.py                            # writes docs/ (web app) and dist
 The word grammar is rebuilt from two files placed in `grammar/`: `quranic-corpus-morphology-0.4.txt`
 (from https://corpus.quran.com/download/) and `MASAQ.csv` (from https://data.mendeley.com/datasets/9yvrzxktmr/5).
 Then run `python src/build_grammar.py` before `python src/build.py`.
-`python src/lemmas.py 1001 1250` prints the next dictionary entries to translate into `src/lemma_meanings.txt`.
+`python src/lemmas.py 1 50` prints dictionary entries with their English glosses, for checking `src/lemma_meanings.txt`.
 
 `docs/` is what GitHub Pages serves. To redraw the icons, run `python src/save_icons.py`,
 open http://127.0.0.1:8770/icons.html and call `saveAll()` in the page.
