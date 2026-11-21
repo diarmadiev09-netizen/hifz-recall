@@ -1,6 +1,6 @@
 // Offline cache for Hifz Recall. build.py stamps VERSION with a hash of the app files,
 // so every deploy installs a fresh cache and removes the old one.
-const VERSION = 'f182eb6071b2';
+const VERSION = '7f44e37031a8';
 const CACHE = 'hifz-' + VERSION;
 const FILES = ['index.html', 'manifest.webmanifest', 'icon-192.png', 'icon-512.png', 'icon-maskable-512.png', 'apple-touch-icon.png'];
 
